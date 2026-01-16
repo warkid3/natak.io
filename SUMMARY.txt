@@ -1,0 +1,43 @@
+# ETL Framework Status Summary
+
+## 1. LoRA Creation (Character Training)
+**Status: IMPLEMENTED**
+- **Working**:
+  - **Pipeline**: Automated flow: Upload -> R2 Transfer -> Fal.ai (Flux LoRA) -> R2 Backup -> DB.
+  - **Storage**: Permanent backup of LoRA weights to user's R2 bucket (`loras/{id}.safetensors`).
+  - **UI**: 
+    - Full drag & drop interface with exact guideline enforcement (12-9-6-3 rule).
+    - Custom "In-App Notification" dialogs for "Clear All" and "Close" (No native alerts).
+    - Auto-generated Trigger Word logic.
+  - **Validation**: Strict 20-30 image count and file type checks server-side.
+  - **Reference Gen**: Post-training hooks configured to trigger reference image generation.
+
+## 2. AssetDAM Batch Configuration
+**Status: IMPLEMENTED**
+- **Working**:
+  - Character (LoRA) Selection.
+  - Prompt Generator (Grok) w/ NSFW Toggle.
+  - Resolution Selector (16:9, 9:16, 4:3, 2:3).
+  - Change Clothes (Image Upload).
+  - Video Toggle.
+  - Generic Model selectors removed.
+
+## 3. Image Generation Pipeline
+**Status: SKELETON ONLY (Next Focus)**
+- **Working**:
+  - Basic job creation structure.
+  - Backend endpoints (`api/generate`) set up.
+- **Missing / Todo**:
+  - **Models**: Explicit integration of `fal-ai/z-image-turbo` (aliased from Flux dev).
+  - **LoRA Loading**: Logic to preload NSFW & Instagram LoRAs + On-demand Character LoRA.
+  - **Clothing**: Segmentation model integration -> Inpainting logic is currently a placeholder.
+  - **Upscaling**: Specific 5x Upscaler implementation (currently generic 4x).
+
+## 4. Video & Animation Pipeline
+**Status: CONCEPTUAL / MISSING**
+- **Working**:
+  - Basic toggle and LTX2 endpoint reference.
+- **Missing**:
+  - **NSFW Routing**: Logic to check (Video + NSFW) -> Trigger Grok NSFW Prompt -> LTX2.
+  - **Wan 2.2 Animate Workaround**:
+    - Workflow for "Extract Frame 1 -> Img2Img Refinement (Z-Image) -> Wan 2.2 Animate" is not implemented.

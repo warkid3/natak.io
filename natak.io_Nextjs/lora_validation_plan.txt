@@ -1,0 +1,26 @@
+# LoRA Validation Implementation Plan
+
+## Objective
+Enforce strict image count limits (min 20, max 30) for LoRA character training on both client and server sides.
+
+## 1. Client-Side Validation (CharacterUpload.tsx)
+- [ ] Update `onDrop` handler:
+    - Prevent adding files if total exceeds 30.
+    - Show toast/alert if user tries to drop more than allowed remaining slots.
+    - Trim selection if dropping a batch that exceeds the limit.
+- [ ] Update "Start Training" button:
+    - Disable if count < 20.
+    - Show visual indicator of count status (e.g., red text for invalid, green for valid).
+- [ ] Add explicit error message area helper text: "Upload 20-30 images to start".
+
+## 2. Server-Side Validation (api/lora/train/route.ts)
+- [ ] In POST handler:
+    - Receive `imageKeys` array.
+    - Check `length`.
+    - If `length < 20` or `length > 30`:
+        - Return HTTP 400 Bad Request.
+        - Message: "Image count must be between 20 and 30".
+
+## 3. User Feedback
+- [ ] Add a visual counter `Current: X / Max: 30` with color coding.
+- [ ] Toast notification on successful start or validation error.

@@ -1,0 +1,5 @@
+{
+  "name": "NATAK Operations Dashboard",
+  "description": "A professional BI dashboard for monitoring multi-step AI content generation pipelines, tracking process health, credit efficiency, and quality control metrics as defined in the NATAK SOP.",
+  "requestFramePermissions": []
+}

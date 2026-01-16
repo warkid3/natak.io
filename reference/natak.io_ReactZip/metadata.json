@@ -1,0 +1,7 @@
+{
+  "name": "natak.io",
+  "description": "An AI-powered content creation SaaS for building consistent digital characters and generating high-identity-consistency images and videos.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
