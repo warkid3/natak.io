@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { mockStore } from '@/lib/mockStore';
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -58,13 +58,21 @@ export default function AuthCallbackPage() {
     }, [searchParams, router]);
 
     return (
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+            <div className="w-8 h-8 bg-primary rounded-[2px]" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                Authenticating...
+            </p>
+        </div>
+    );
+}
+
+export default function AuthCallbackPage() {
+    return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center font-sans text-white">
-            <div className="flex flex-col items-center gap-4 animate-pulse">
-                <div className="w-8 h-8 bg-primary rounded-[2px]" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
-                    Authenticating...
-                </p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+                <AuthCallbackContent />
+            </Suspense>
         </div>
     );
 }

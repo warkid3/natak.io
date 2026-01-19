@@ -3,44 +3,163 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   NATAK.io Design System + ShadCN UI
+   Brutalist Industrial Aesthetic - Bloomberg Terminal meets Factory Floor
+   ============================================================ */
+
+:root {
+  /* Core Brand Colors */
+  --void-black: #070708;
+  --acid-lime: #DFFF00;
+  --charcoal: #0F0F11;
+  --steel-gray: #1A1A1D;
+  --industrial-white: #F5F5F5;
+  --muted-gray: #6B6B6B;
+
+  /* ShadCN Variables (Light - not used, but required) */
+  --radius: 0.5rem;
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.705 0.015 286.067);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.21 0.006 285.885);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  /* Animation Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-mechanical: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ============================================================
+   DARK MODE (NATAK Brutalist Theme)
+   ============================================================ */
+.dark {
+  /* ShadCN Dark Theme - Customized for NATAK */
+  --background: #070708;
+  --foreground: #F5F5F5;
+  --card: #0F0F11;
+  --card-foreground: #F5F5F5;
+  --popover: #0F0F11;
+  --popover-foreground: #F5F5F5;
+
+  /* Primary = Acid Lime */
+  --primary: #DFFF00;
+  --primary-foreground: #070708;
+
+  /* Secondary = Steel Gray */
+  --secondary: #1A1A1D;
+  --secondary-foreground: #F5F5F5;
+
+  /* Muted */
+  --muted: #1A1A1D;
+  --muted-foreground: #6B6B6B;
+
+  /* Accent = Acid Lime (subtle) */
+  --accent: #1A1A1D;
+  --accent-foreground: #F5F5F5;
+
+  /* Destructive */
+  --destructive: #EF4444;
+
+  /* Borders & Input */
+  --border: rgba(245, 245, 245, 0.08);
+  --input: rgba(245, 245, 245, 0.08);
+  --ring: #DFFF00;
+
+  /* Charts */
+  --chart-1: #DFFF00;
+  --chart-2: #22C55E;
+  --chart-3: #F59E0B;
+  --chart-4: #3B82F6;
+  --chart-5: #EF4444;
+
+  /* Sidebar */
+  --sidebar: #0F0F11;
+  --sidebar-foreground: #F5F5F5;
+  --sidebar-primary: #DFFF00;
+  --sidebar-primary-foreground: #070708;
+  --sidebar-accent: #1A1A1D;
+  --sidebar-accent-foreground: #F5F5F5;
+  --sidebar-border: rgba(245, 245, 245, 0.08);
+  --sidebar-ring: #DFFF00;
+}
+
 @theme inline {
+  /* Tailwind 4 Custom Theme */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
 
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
+  /* Brand Colors */
+  --color-void: var(--void-black);
+  --color-lime: var(--acid-lime);
+  --color-charcoal: var(--charcoal);
+  --color-steel: var(--steel-gray);
+  --color-industrial: var(--industrial-white);
 
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  /* ShadCN Colors */
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -48,129 +167,223 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Sparkles & Gradient */
+  --color-sparkles-color: var(--sparkles-color);
+  --color-gradient-color: var(--gradient-color);
 }
 
 :root {
-  --radius: 15px;
-
-  /* Brand Colors */
-  --background: #000000;
-  --foreground: #ffffff;
-  --surface: #0F0F11;
-  --primary: #CCFF00;
-  --primary-foreground: #000000;
-
-  --card: #0F0F11;
-  --card-foreground: #ffffff;
-  --popover: #0F0F11;
-  --popover-foreground: #ffffff;
-
-  --secondary: #27272a;
-  --secondary-foreground: #ffffff;
-
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-
-  --accent: #27272a;
-  --accent-foreground: #ffffff;
-
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #CCFF00;
-
-  --chart-1: #CCFF00;
-  --chart-2: #27272a;
-  --chart-3: #ffffff;
-  --chart-4: #a1a1aa;
-  --chart-5: #0F0F11;
-
-  /* Sidebar */
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #CCFF00;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #0F0F11;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #CCFF00;
+  --gradient-color: #8350e8;
+  --sparkles-color: #8350e8;
 }
 
 .dark {
-  /* Inherit root since we are forcing dark mode look */
-  --background: #000000;
-  --foreground: #ffffff;
-  --surface: #0F0F11;
-  --primary: #CCFF00;
-  --primary-foreground: #000000;
-  --card: #0F0F11;
-  --card-foreground: #ffffff;
-  --popover: #0F0F11;
-  --popover-foreground: #ffffff;
-  --secondary: #27272a;
-  --secondary-foreground: #ffffff;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #CCFF00;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #CCFF00;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #0F0F11;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #CCFF00;
+  --gradient-color: #8350e8;
+  --sparkles-color: #ffffff;
 }
 
-@layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--surface);
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 3px;
-  }
-
-  /* Hide scrollbar */
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .text-natak {
-    @apply uppercase tracking-tighter font-black;
-  }
-}
+/* ============================================================
+   Base Styles
+   ============================================================ */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
   }
-  body {
-    @apply bg-background text-foreground font-sans;
-  }
-}
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+  html {
+    scroll-behavior: smooth;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ============================================================
+   Typography Scale (Industrial Precision)
+   ============================================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+h4 {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+.mono {
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Custom Utility Classes
+   ============================================================ */
+
+/* Container Sizes */
+.container-narrow {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container-wide {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Acid Lime Glow Effect */
+.glow-lime {
+  box-shadow: 0 0 40px rgba(223, 255, 0, 0.3);
+}
+
+.glow-lime-subtle {
+  box-shadow: 0 0 60px rgba(223, 255, 0, 0.15);
+}
+
+/* Section Wrapper */
+.section {
+  padding: 6rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 3rem 1rem;
+  }
+}
+
+/* ============================================================
+   Animation Utilities
+   ============================================================ */
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   Scrollbar Styling (Brutalist)
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--steel-gray);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--acid-lime);
+}
+
+/* ============================================================
+   Selection Styling
+   ============================================================ */
+
+::selection {
+  background: var(--acid-lime);
+  color: var(--void-black);
+}
+
+::-moz-selection {
+  background: var(--acid-lime);
+  color: var(--void-black);
+}
+
+/* ============================================================
+   Custom Button Variants (extends ShadCN)
+   ============================================================ */
+
+.btn-lime {
+  background: var(--acid-lime);
+  color: var(--void-black);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 300ms;
+}
+
+.btn-lime:hover {
+  box-shadow: 0 0 40px rgba(223, 255, 0, 0.4);
+  transform: translateY(-0.125rem);
+}
+
+.btn-outline-lime {
+  border: 1px solid var(--acid-lime);
+  color: var(--acid-lime);
+  background: transparent;
+  transition: all 300ms;
+}
+
+.btn-outline-lime:hover {
+  background: var(--acid-lime);
+  color: var(--void-black);
 }

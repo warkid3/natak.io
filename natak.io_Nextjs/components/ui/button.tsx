@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        natak: "bg-primary text-primary-foreground rounded-none hover:bg-primary/90 uppercase tracking-tighter font-black",
+        natak: "bg-primary text-primary-foreground hover:opacity-90 font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_14px_0_rgba(0,0,0,0.39)]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
