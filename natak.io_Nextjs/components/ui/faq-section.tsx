@@ -23,7 +23,7 @@ const faqs = [
     {
         question: "How is this different from other AI image generators?",
         answer:
-            "Standard AI generators create random faces that change every time. NATAK.io uses your personal Identity Model to maintain consistent facial features across unlimited generations. Plus, our Kanban Factory lets you batch process 50+ images at once, and the Vibe Stealer captures styles from anywhere on the web. It's industrial-grade content infrastructure, not a toy.",
+            "Standard AI generators create random faces that change every time, making branding impossible for AI influencers. NATAK.io uses your personal Identity Model to maintain consistent facial features across unlimited generations. Plus, our Kanban Factory lets you batch process 50+ images at once, the Vibe Stealer captures styles from anywhere, and our Neural Content Lake provides instant asset search. It's industrial ETL infrastructure for AI creator operations—not a hobbyist tool.",
     },
     {
         question: "What's a 'generation credit' and how are they used?",
@@ -38,7 +38,7 @@ const faqs = [
     {
         question: "How does the Vibe Stealer Chrome Extension work?",
         answer:
-            "When you see an image with a style you love (on Instagram, Pinterest, anywhere), right-click and select 'Send to NATAK'. We extract the visual DNA—composition, lighting, color palette, mood—and save it as a reusable style template. Then apply that style to your Identity Model for consistent on-brand content.",
+            "When you see an image with a style you love (on Instagram, Pinterest, anywhere), right-click and select 'Send to NATAK'. We extract the visual DNA—composition, lighting, color palette, mood—and save it as a reusable style template. Then apply that style to your AI character's Identity Model for consistent on-brand AI influencer content.",
     },
     {
         question: "What's the Founder's Syndicate?",
@@ -48,7 +48,7 @@ const faqs = [
     {
         question: "Is my data and Identity Model secure?",
         answer:
-            "Yes. Your training photos are encrypted and deleted after model training. Your Identity Model is stored encrypted at rest and never shared with other users. We don't use your images to train our base models. Your identity belongs to you.",
+            "Yes. Your training photos are encrypted end-to-end and deleted after model training. Your Identity Model (LoRA) is stored encrypted in your private cloud bucket and never shared with other users. We don't use your images to train our base models. Your AI character's identity belongs exclusively to you.",
     },
 ];
 

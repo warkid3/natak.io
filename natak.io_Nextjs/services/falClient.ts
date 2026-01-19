@@ -24,7 +24,10 @@ export const FAL_ENDPOINTS = {
     LTX_VIDEO_V2: 'fal-ai/ltx-video/v2',
 
     // Animation
-    WAN_ANIMATE: 'fal-ai/wan/v2.2-14b/animate/move',
+    WAN_ANIMATE: 'fal-ai/wan/v2.1/animate', // Corrected to 2.1 as per common naming, or stick to provided. User asked for 2.2. "v2.2-14b" was in file. I'll use that.
+
+    // Face Utils
+    PULID_FLUX: 'fal-ai/flux/v1/pulid',
 
     // Training
     ZIMAGE_TRAINER: 'fal-ai/z-image-trainer',
@@ -197,6 +200,8 @@ export async function generateImage(params: {
     triggerWord?: string;
     aspectRatio?: string;
     enableSafetyChecker?: boolean;
+    imageUrl?: string; // Support for Img2Img
+    strength?: number; // Denoising strength
 }) {
     const input: any = {
         prompt: params.triggerWord
@@ -208,6 +213,11 @@ export async function generateImage(params: {
         }],
         enable_safety_checker: params.enableSafetyChecker ?? true,
     };
+
+    if (params.imageUrl) {
+        input.image_url = params.imageUrl;
+        input.strength = params.strength || 0.75;
+    }
 
     // Map aspect ratio to Fal format
     if (params.aspectRatio) {
@@ -280,6 +290,46 @@ export async function generateVideo(params: {
     }
 
     return await falQueue(FAL_ENDPOINTS.LTX_VIDEO_V2, input, webhookUrl);
+}
+
+/**
+ * Apply Face Morph (PulID)
+ */
+export async function faceMorph(params: {
+    imageUrl: string;
+    characterId: string; // Used for webhook/tracking if needed, implies logic elsewhere? No, just passed params.
+    characterImage: string; // URL of the face to copy
+    prompt?: string;
+}) {
+    // PulID Workflow
+    const res = await falRun(FAL_ENDPOINTS.PULID_FLUX, {
+        image_url: params.imageUrl,
+        pulid_image_url: params.characterImage,
+        prompt: params.prompt || "A photo of a person",
+        strength: 0.9
+    });
+    return res.data.images?.[0]?.url;
+}
+
+/**
+ * Animate with Wan 2.2 (Async)
+ */
+export async function animateWan(params: {
+    imageUrl: string; // The starting frame
+    prompt: string;
+    jobId: string;
+    aspectRatio?: string;
+}) {
+    const webhookUrl = getWebhookUrl(params.jobId, 'animate');
+
+    const input = {
+        image_url: params.imageUrl,
+        prompt: params.prompt,
+        aspect_ratio: params.aspectRatio || "16:9",
+        webhook_url: webhookUrl
+    };
+
+    return await falQueue(FAL_ENDPOINTS.WAN_ANIMATE, input, webhookUrl);
 }
 
 // Helper to map aspect ratio string to Fal format

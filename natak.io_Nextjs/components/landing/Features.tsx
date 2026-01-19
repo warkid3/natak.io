@@ -32,23 +32,23 @@ export function Features() {
                             <InfoCard
                                 variant="chaos"
                                 icon={Search}
-                                label="Manual Search"
+                                label="Asset Discovery Friction"
                                 value="High Friction"
-                                detail="Creators spend 40% of their time just looking for files across unindexed SSDs."
+                                detail="AI creator teams spend 40% of their time searching for specific assets across unindexed storage systems and fragmented cloud buckets."
                             />
                             <InfoCard
                                 variant="chaos"
                                 icon={Activity}
-                                label="Manual Processing"
+                                label="Training on Consumer Hardware"
                                 value="System Lag"
-                                detail="Batch upscaling and formatting takes days of manual labor on consumer hardware."
+                                detail="Training Identity Models (LoRAs) and batch upscaling thousands of AI-generated images requires days of manual supervision on local GPUs."
                             />
                             <InfoCard
                                 variant="chaos"
                                 icon={LinkIcon}
-                                label="Fragmentation"
-                                value="Data Silos"
-                                detail="Metadata and visual assets are disconnected across 5+ incompatible clouds."
+                                label="Identity Consistency Breakdown"
+                                value="Brand Chaos"
+                                detail="Generic AI tools generate random faces every time. Maintaining visual brand continuity for virtual influencers across 5+ platforms is nearly impossible."
                             />
                         </div>
                     </FeatureCard>
@@ -68,23 +68,23 @@ export function Features() {
                             <InfoCard
                                 variant="order"
                                 icon={Cpu}
-                                label="Neural Search"
+                                label="Neural Content Lake"
                                 value="Zero Latency"
-                                detail="Our AI-powered Content Lake indexes every frame for instant retrieval via natural language."
+                                detail="Our AI-powered DAM indexes every asset for instant retrieval via natural language. Search by scene, style, or character identity—zero manual tagging."
                             />
                             <InfoCard
                                 variant="order"
                                 icon={FastForward}
-                                label="Industrial Scale"
+                                label="Identity Persistence Engine"
                                 value="GPU Accelerated"
-                                detail="Offload processing to NATAK's GPU clusters for 100x faster ingestion and transformation."
+                                detail="Train custom LoRAs once, generate unlimited AI influencer content with perfect facial consistency. GPU clusters process at 100x consumer hardware speed."
                             />
                             <InfoCard
                                 variant="order"
                                 icon={Lock}
-                                label="Atomic Sync"
+                                label="ETL Pipeline Automation"
                                 value="Unified DNA"
-                                detail="Character identity and brand metadata are locked into every asset at the hardware layer."
+                                detail="Extract fan engagement insights, Transform raw prompts into optimized assets, Load directly to distribution channels. Your content factory runs 24/7."
                             />
                         </CardContent>
                     </FeatureCard>

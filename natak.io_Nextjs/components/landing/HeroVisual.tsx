@@ -12,6 +12,7 @@ import {
     ShieldCheck,
     AlertOctagon
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { QueueManager } from './QueueManager';
 
 interface HeroVisualProps {
@@ -79,10 +80,10 @@ export function HeroVisual({ view, isSystemActive, setIsSystemActive }: HeroVisu
                             transition={{ duration: 0.6 }}
                         >
                             <h1 className="text-white text-3xl md:text-5xl font-black uppercase tracking-tighter italic leading-none mb-4">
-                                Does your content <br /> <span className="text-red-500 underline underline-offset-[12px]">struggle to scale?</span>
+                                Does your AI creator content <br /> <span className="text-red-500 underline underline-offset-[12px]">struggle to scale?</span>
                             </h1>
                             <div className="space-y-1">
-                                <p className="text-red-500/60 text-[10px] md:text-xs font-bold uppercase tracking-widest">From Unorganized Chaos / Broken Workflows</p>
+                                <p className="text-red-500/60 text-[10px] md:text-xs font-bold uppercase tracking-widest">From Manual Workflows / Fragmented Infrastructure</p>
                             </div>
                         </motion.div>
                     ) : (
@@ -94,10 +95,10 @@ export function HeroVisual({ view, isSystemActive, setIsSystemActive }: HeroVisu
                             transition={{ duration: 0.6 }}
                         >
                             <h1 className="text-black text-3xl md:text-5xl font-black uppercase tracking-tighter italic leading-none mb-4">
-                                Grow your content <br /> <span className="underline decoration-black underline-offset-[12px]">while you sleep</span>
+                                Scale your AI influencer operations <br /> <span className="underline decoration-black underline-offset-[12px]">while you sleep</span>
                             </h1>
                             <div className="space-y-1">
-                                <p className="text-black/60 text-[10px] md:text-xs font-bold uppercase tracking-widest">Automated Management / Systems Perfected</p>
+                                <p className="text-black/60 text-[10px] md:text-xs font-bold uppercase tracking-widest">Industrial ETL Infrastructure / GPU-Accelerated Pipelines</p>
                             </div>
                         </motion.div>
                     )}
@@ -135,28 +136,18 @@ export function HeroVisual({ view, isSystemActive, setIsSystemActive }: HeroVisu
                             {isSystemActive ? 'AUTOMATION SYSTEM ACTIVE' : 'AWAITING MEDIA INPUT'}
                         </span>
 
-                        <button
-                            onClick={toggleSystem}
-                            className={`flex items-center gap-3 px-5 py-2 rounded-full border transition-all active:scale-95 group
-                ${isSystemActive
-                                    ? 'bg-lime/10 border-lime/40 text-lime shadow-[0_0_20px_rgba(223,255,0,0.15)]'
-                                    : 'bg-white/5 border-white/10 text-white/40'}
-              `}
-                        >
+                        <div className="flex items-center gap-3">
                             <span className="text-[9px] font-bold uppercase tracking-widest">
                                 {isSystemActive ? 'SYSTEM ON' : 'START SYSTEM'}
                             </span>
-                            <div className={`w-8 h-4 rounded-full relative p-0.5 flex items-center transition-colors
-                ${isSystemActive ? 'bg-lime/30' : 'bg-neutral-800'}
-              `}>
-                                <motion.div
-                                    layout
-                                    className={`w-3 h-3 rounded-full shadow-lg ${isSystemActive ? 'bg-lime' : 'bg-red-600'}`}
-                                    animate={{ x: isSystemActive ? 16 : 0 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                />
-                            </div>
-                        </button>
+                            <Switch
+                                checked={isSystemActive}
+                                onCheckedChange={toggleSystem}
+                                className={`${isSystemActive
+                                    ? 'data-[state=checked]:bg-lime'
+                                    : 'data-[state=unchecked]:bg-neutral-800'}`}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -183,7 +174,7 @@ export function HeroVisual({ view, isSystemActive, setIsSystemActive }: HeroVisu
                                     <div className="relative w-full group">
                                         <input
                                             type="text"
-                                            placeholder="E.g. Too much footage, slow editing..."
+                                            placeholder="E.g. Thousands of assets, no organization..."
                                             value={pinpoint}
                                             onChange={(e) => setPinpoint(e.target.value)}
                                             className="w-full bg-black border border-white/10 rounded-xl px-6 py-5 text-sm focus:outline-none focus:border-red-500/50 transition-all text-white placeholder:text-neutral-800 font-medium"
@@ -224,16 +215,16 @@ export function HeroVisual({ view, isSystemActive, setIsSystemActive }: HeroVisu
                         x: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: item.id * 0.1 },
                     }}
                     style={{ position: 'absolute', left: `${item.x}%`, top: `${item.y}%` }}
-                    className="z-10 hidden lg:block"
+                    className="z-50 hidden lg:block"
                 >
                     <motion.div
-                        className={`px-4 py-2.5 rounded-2xl border backdrop-blur-md shadow-2xl flex items-center gap-3 transition-all duration-700
+                        className={`px-4 py-2.5 rounded-2xl border backdrop-blur-3xl shadow-2xl flex items-center gap-3 transition-all duration-700
               ${isSystemActive
-                                ? 'bg-black border-white/20 text-white'
-                                : 'bg-red-950/20 border-red-500/30 text-red-400'}
+                                ? 'bg-black/30 border-lime/40 text-white shadow-[0_8px_32px_rgba(223,255,0,0.15)]'
+                                : 'bg-black/20 border-red-500/40 text-red-400 shadow-[0_8px_32px_rgba(255,0,0,0.1)]'}
             `}
                     >
-                        <div className={`p-2 rounded-xl ${isSystemActive ? 'bg-lime shadow-[0_0_10px_rgba(223,255,0,0.5)]' : 'bg-red-500/10'}`}>
+                        <div className={`p-2 rounded-xl ${isSystemActive ? 'bg-lime shadow-[0_0_10px_rgba(223,255,0,0.5)]' : 'bg-red-500/20'}`}>
                             {isSystemActive ? item.order.icon : item.chaos.icon}
                         </div>
                         <span className="text-[10px] font-bold uppercase tracking-tight italic">

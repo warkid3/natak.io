@@ -175,16 +175,22 @@
   /* Sparkles & Gradient */
   --color-sparkles-color: var(--sparkles-color);
   --color-gradient-color: var(--gradient-color);
+
+  /* Button Ripple & Custom Pricing UI */
+  --radius-none: 0px;
+  --color-button-ripple-color: var(--button-ripple-color);
 }
 
 :root {
   --gradient-color: #8350e8;
   --sparkles-color: #8350e8;
+  --button-ripple-color: oklch(0.145 0 0 / 0.3);
 }
 
 .dark {
   --gradient-color: #8350e8;
   --sparkles-color: #ffffff;
+  --button-ripple-color: oklch(0.985 0 0 / 0.5);
 }
 
 /* ============================================================

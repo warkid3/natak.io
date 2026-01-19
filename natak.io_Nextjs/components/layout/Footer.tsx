@@ -32,8 +32,8 @@ export function Footer() {
                 <div className="space-y-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Governance</div>
                     <ul className="space-y-3 text-sm font-bold uppercase tracking-widest text-zinc-500">
-                        <li className="hover:text-lime cursor-pointer transition-colors">Terms_of_Service</li>
-                        <li className="hover:text-lime cursor-pointer transition-colors">Privacy_Policy</li>
+                        <li><Link href="/tos" className="hover:text-lime cursor-pointer transition-colors">Terms_of_Service</Link></li>
+                        <li><Link href="/privacy" className="hover:text-lime cursor-pointer transition-colors">Privacy_Policy</Link></li>
                         <li className="hover:text-lime cursor-pointer transition-colors">Security_Audit</li>
                         <li className="hover:text-lime cursor-pointer transition-colors">Founder_Offer</li>
                     </ul>

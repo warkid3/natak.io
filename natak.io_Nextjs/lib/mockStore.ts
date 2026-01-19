@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
     USER: 'prism_user',
     CHARACTERS: 'prism_characters',
     ASSETS: 'prism_assets',
+    COLLECTIONS: 'prism_collections',
     JOBS: 'prism_jobs',
     INBOX: 'prism_inbox',
     STARRED_PROMPTS: 'prism_starred_prompts',
@@ -108,15 +109,36 @@ class MockStore {
         localStorage.setItem(STORAGE_KEYS.CHARACTERS, JSON.stringify(updated));
     }
 
+    getCollections(): any[] {
+        if (!this.isClient) return [];
+        const data = localStorage.getItem(STORAGE_KEYS.COLLECTIONS);
+        if (!data) {
+            const initial = [
+                { id: 'c-1', name: 'Urban Core', count: 12, created_at: new Date().toISOString() },
+                { id: 'c-2', name: 'Vogue X', count: 5, created_at: new Date().toISOString() },
+                { id: 'c-3', name: 'Cyber Noir', count: 8, created_at: new Date().toISOString() }
+            ];
+            localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify(initial));
+            return initial;
+        }
+        return JSON.parse(data);
+    }
+
+    saveCollection(collection: any) {
+        if (!this.isClient) return;
+        const cols = this.getCollections();
+        localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify([...cols, collection]));
+    }
+
     getAssets(): Asset[] {
         if (!this.isClient) return [];
         const data = localStorage.getItem(STORAGE_KEYS.ASSETS);
         if (!data) {
             const initial: Asset[] = [
-                { id: 'a1', url: 'https://picsum.photos/seed/prism1/600/800', caption: 'Vibrant Neon Cityscape', type: 'image', source: 'scraped', collection: 'Urban Core' },
-                { id: 'a2', url: 'https://picsum.photos/seed/prism2/600/800', caption: 'High Fashion Studio Silhouette', type: 'image', source: 'scraped', collection: 'Vogue X' },
-                { id: 'a3', url: 'https://picsum.photos/seed/prism3/600/800', caption: 'Minimalist Tech Noir', type: 'image', source: 'upload' },
-                { id: 'a4', url: 'https://picsum.photos/seed/prism4/600/800', caption: 'Cyberpunk Portrait Reference', type: 'image', source: 'scraped', collection: 'Urban Core' }
+                { id: '11111111-1111-4111-8111-111111111111', url: 'https://picsum.photos/seed/prism1/600/800', caption: 'Vibrant Neon Cityscape', type: 'image', source: 'scraped', collection_id: 'c-1', tags: ['neon', 'city'] },
+                { id: '22222222-2222-4222-8222-222222222222', url: 'https://picsum.photos/seed/prism2/600/800', caption: 'High Fashion Studio Silhouette', type: 'image', source: 'scraped', collection_id: 'c-2', tags: ['fashion', 'studio'] },
+                { id: '33333333-3333-4333-8333-333333333333', url: 'https://picsum.photos/seed/prism3/600/800', caption: 'Minimalist Tech Noir', type: 'image', source: 'upload', tags: ['minimal', 'tech'] },
+                { id: '44444444-4444-4444-8444-444444444444', url: 'https://picsum.photos/seed/prism4/600/800', caption: 'Cyberpunk Portrait Reference', type: 'image', source: 'scraped', collection_id: 'c-1', tags: ['cyberpunk', 'portrait'] }
             ];
             localStorage.setItem(STORAGE_KEYS.ASSETS, JSON.stringify(initial));
             return initial;

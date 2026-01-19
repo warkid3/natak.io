@@ -84,17 +84,19 @@ export function Navbar({ isSystemActive }: NavProps) {
     ];
 
     const loginButtonElement = (
-        <button className={`px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest border transition-all duration-700 rounded-full backdrop-blur-md w-full sm:w-auto
+        <Link href="/login">
+            <button className={`px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest border transition-all duration-700 rounded-full backdrop-blur-md w-full sm:w-auto
       ${isSystemActive
-                ? 'border-black/20 bg-black/5 text-black hover:bg-black/10'
-                : 'border-white/10 bg-white/5 text-gray-400 hover:border-lime/50 hover:text-white'}
+                    ? 'border-black/20 bg-black/5 text-black hover:bg-black/10'
+                    : 'border-white/10 bg-white/5 text-gray-400 hover:border-lime/50 hover:text-white'}
     `}>
-            Log In
-        </button>
+                Log In
+            </button>
+        </Link>
     );
 
     const signupButtonElement = (
-        <div className="relative group w-full sm:w-auto">
+        <Link href="/signup" className="relative group w-full sm:w-auto block">
             <div className={`absolute inset-0 -m-1.5 rounded-full hidden sm:block opacity-20 filter blur-lg pointer-events-none transition-all duration-300 ease-out group-hover:opacity-40 group-hover:blur-xl group-hover:-m-3
          ${isSystemActive ? 'bg-black' : 'bg-lime'}
        `}></div>
@@ -105,7 +107,7 @@ export function Navbar({ isSystemActive }: NavProps) {
        `}>
                 Get Started
             </button>
-        </div>
+        </Link>
     );
 
     return (

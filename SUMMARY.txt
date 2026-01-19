@@ -41,3 +41,52 @@
   - **NSFW Routing**: Logic to check (Video + NSFW) -> Trigger Grok NSFW Prompt -> LTX2.
   - **Wan 2.2 Animate Workaround**:
     - Workflow for "Extract Frame 1 -> Img2Img Refinement (Z-Image) -> Wan 2.2 Animate" is not implemented.
+
+Todo
+---
+We need to Prepare a Chrome Extenion for the The style Extarctor 
+  How it will work
+  -The Style Extarctor will be a Chrome Extenion
+  -We need a Way to Download the Files and Load it in our R2 Bucket and Show them in our library
+  -we also need to add a way to uplaod files Directly to our Asset DAM
+  -The Taget Platfom are Printrest and Instagram
+  - it needs to also have the ability to download Vids as well
+
+We need to Conform the flow of Wan 2.2 Animate and Configure the AssetDAm batch Config sidebar for this 
+The Flow will be kind of same as image Generation 
+Video (In AssetDAM) -> Extract Frame 1 -> FaceMorph with our Character -> Img2Img Refinement (Dress Segmentation if needed to chnage Dress) (Z-Image) -> Wan 2.2 Animate -> Animation (Output in library)  
+
+The Wen need to Plan for the Onboarding of the New Users 
+The Onboarding will Follow the Follwing processes
+1. User will Sign Up with their Email and Password
+2. Authenicate them with Supabase
+3. The User will be asked to Crate a Organization or Join Organization
+4. if the User is to join the Organization then the User will be asked to enter the Organization ID
+5. if the User is to create the Organization then the User will be asked to enter the Organization Name
+6. the here will be some Marketing Quctonare to ask the User about their needs (plan this)
+7. Prompt them to Selcet a Paln (show them the Pricig Page)
+8. Give them a Welcome Email
+
+Make Chnages to the UI of the Landing Website
+1. Connect the Buttons 
+2. Add the Pricing Page
+3. Add the Blog Page And Connect to Sanity.io
+4. Change Can Craft a Better Copy for Marketing
+6. Setup TOS and Privacy Policy
+7. get the Domain and Connect it to the Website
+
+Technical Dependencies (To Tackle)
+---
+1. Payment Infrastructure
+   - Integrate Stripe/LemonSqueezy for subscription management.
+   - Webhook handlers for subscription updates/cancellations.
+
+2. Chrome Extension Auth
+   - Build API Key system (Settings -> Developers -> Create Key).
+   - OAuth for Extension if we want smoother login.
+
+3. Email Service
+   - Set up Resend/SendGrid for transactional emails (Welcome, Invite, Bill).
+
+4. Advanced Pipeline Tech
+   - Decide on Face Morph Tech: PulID vs Reactor/InsightFace for the Wan 2.2 pipeline.

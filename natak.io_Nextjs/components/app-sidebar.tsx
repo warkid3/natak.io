@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -231,6 +232,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarContent>
 
             <SidebarRail />
+
+            <div className="border-t border-zinc-800 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">Profile</span>
+                    <UserButton afterSignOutUrl="/" />
+                </div>
+                <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">Team</span>
+                    <OrganizationSwitcher
+                        appearance={{
+                            elements: {
+                                organizationPreviewTextContainer: "text-white",
+                                organizationSwitcherTrigger: "text-white hover:text-primary"
+                            }
+                        }}
+                    />
+                </div>
+            </div>
         </Sidebar>
     );
 }

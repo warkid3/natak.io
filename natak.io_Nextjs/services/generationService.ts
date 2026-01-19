@@ -45,8 +45,14 @@ async function updateJobStep(jobId: string, step: PipelineStep, includeVideo: bo
  * Main generation pipeline
  * Orchestrates: Prompt → Image → [Cloth Swap] → Upscale → [Video]
  */
-export async function processGenerationJob(jobId: string, userId: string, config: GenConfig) {
+export async function processGenerationJob(jobId: string, userId: string, config: GenConfig & { video_action?: string, asset_url?: string }) {
+    // Route to Video Pipeline if Action is present
+    if (config.video_action) {
+        return processVideoJob(jobId, userId, config);
+    }
+
     try {
+        // ... Image Pipeline ...
         // Initialize tracking
         const platform = inferPlatform(config);
         await supabase.from("jobs").update({
@@ -187,6 +193,61 @@ export async function processGenerationJob(jobId: string, userId: string, config
             error: error.message
         }).eq("id", jobId);
         return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Video Animation Pipeline (Wan 2.2)
+ * Video -> Frame -> Face Morph (LoRA) -> Animate
+ */
+export async function processVideoJob(jobId: string, userId: string, config: any) {
+    try {
+        console.log(`Starting Video Job ${jobId} [${config.video_action}]`);
+
+        await supabase.from("jobs").update({
+            status: 'processing',
+            current_step: PipelineStep.VIDEO_PREP,
+            progress: 5
+        }).eq("id", jobId);
+
+        // 1. Fetch Character
+        const { data: character } = await supabase.from("characters").select("*").eq("id", config.characterId).single();
+        if (!character) throw new Error("Character not found");
+
+        // 2. Extract Frame (Mock: use Asset URL directly assuming Image for now)
+        const sourceFrameUrl = config.asset_url;
+        if (!sourceFrameUrl) throw new Error("No asset URL provided");
+
+        // 3. Face Morph / Img2Img with Character LoRA
+        const morphedFrameUrl = await generateImage({
+            prompt: config.prompt,
+            loraUrl: character.lora_url!,
+            triggerWord: character.trigger_word,
+            imageUrl: sourceFrameUrl,
+            strength: 0.65,
+            aspectRatio: config.aspectRatio
+        });
+
+        if (!morphedFrameUrl) throw new Error("Face Morphing failed");
+        await updateJobStep(jobId, PipelineStep.BASE_GEN, true);
+
+        // 4. Animate with Wan 2.2
+        const { requestId } = await import("./falClient").then(m => m.animateWan({
+            imageUrl: morphedFrameUrl,
+            prompt: config.prompt,
+            jobId: jobId,
+            aspectRatio: config.aspectRatio
+        }));
+
+        await supabase.from("jobs").update({
+            metadata: { fal_request_id: requestId },
+            current_step: PipelineStep.VIDEO_GEN,
+            progress: 50
+        }).eq("id", jobId);
+
+    } catch (error: any) {
+        console.error("Video Job Error", error);
+        await supabase.from("jobs").update({ status: 'failed', error: error.message }).eq("id", jobId);
     }
 }
 

@@ -52,13 +52,23 @@ export interface CharacterModel {
     created_at: string;
 }
 
-export interface Asset {
+export interface Collection {
     id: string;
+    name: string;
+    description?: string;
+    count: number;
+    created_at: string;
+}
+
+export interface Asset {
+    id: string; // UUID
     url: string;
     caption: string;
-    collection?: string;
+    collection_id?: string; // Link to Collection
+    tags?: string[]; // For filtering
     type: 'image' | 'video';
     source: 'scraped' | 'upload';
+    created_at?: string;
 }
 
 export interface GenerationJob {
