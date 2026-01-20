@@ -1,0 +1,284 @@
+# NATAK.io MVP Planning Document
+# Date: January 20, 2026
+
+================================================================================
+PART 1: ANALYTICS PAGE REDESIGN
+================================================================================
+
+## Goal
+- Switch from Recharts to ShadCN UI Charts
+- Focus on User-Centric KPIs (not internal ops metrics)
+
+## Current KPIs (REMOVE/RETHINK)
+- Accept Rate → Confusing, internal metric
+- Refund Rate → Business metric, not user-facing
+- Avg QC Time → Too technical
+- Pipeline Velocity → Internal ops, users don't care
+
+## NEW KPIs (User Focused)
+
+### Row 1: Big Number Cards (4 cards)
+1. Credits Remaining     → "2,450 CR"
+2. Credits Used (Week)   → "550 CR" 
+3. Jobs Completed        → "127"
+4. Success Rate          → "94.2%"
+
+### Row 2: Main Chart
+- Usage Over Time (Area Chart)
+- X-axis: Days (last 7 or 30 days toggle)
+- Y-axis: Credits spent
+- Shows spending trend
+
+### Row 3: Breakdown Charts (2 cards side by side)
+
+Left Card - By Character (Horizontal Bar Chart)
+- Shows which LoRAs/Characters used most
+- Example:
+  - Model_A_V2: 45 jobs
+  - Brand_Amb: 32 jobs
+  - Vogue_01: 20 jobs
+
+Right Card - By Content Type (Donut Chart)
+- Image vs Video split
+- Example:
+  - Images: 78%
+  - Videos: 22%
+
+## Data Sources
+- Credits: profiles.credits + credits_ledger table
+- Jobs: jobs table (count, status, character_id)
+- Success Rate: jobs WHERE status='completed' / total jobs
+
+## Tech Stack
+- ShadCN UI Charts (uses Recharts under hood but styled)
+- Real data from Supabase (not mock)
+
+## Optional Future Additions
+- Top prompts used
+- Average generation time
+- Cost per job breakdown
+- Export to CSV
+
+================================================================================
+PART 2: MVP ONBOARDING FLOW
+================================================================================
+
+## Philosophy
+- NO organization system for MVP (solo users only)
+- Minimal friction - get to dashboard FAST
+- Delight with design, not complexity
+- Plan upgrade happens AFTER they see value
+
+## The Flow (4 Steps)
+
+### Step 1: Signup Page (/signup)
+┌─────────────────────────────────────────┐
+│                                         │
+│   [NATAK.io Logo]                       │
+│                                         │
+│   CREATE YOUR ACCOUNT                   │
+│                                         │
+│   ┌─────────────────────────────────┐   │
+│   │ Email                           │   │
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ Password                        │   │
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ Confirm Password                │   │
+│   └─────────────────────────────────┘   │
+│                                         │
+│   [  CREATE ACCOUNT  ] (Primary btn)    │
+│                                         │
+│   ─────── OR ───────                    │
+│                                         │
+│   [  Continue with Google  ]            │
+│                                         │
+│   Already have an account? Login        │
+│                                         │
+└─────────────────────────────────────────┘
+
+Tech: Supabase Auth (email + Google OAuth)
+
+### Step 2: Email Verification
+- Supabase sends verification email automatically
+- User clicks link → verified
+- Redirect to /onboarding/welcome
+
+### Step 3: Welcome Screen (/onboarding/welcome)
+┌─────────────────────────────────────────┐
+│                                         │
+│   🎬 Welcome to NATAK                   │
+│                                         │
+│   Your AI content factory is ready.     │
+│                                         │
+│   What would you like to do first?      │
+│                                         │
+│   ┌─────────────────────────────────┐   │
+│   │ 🎭 Train my first character     │   │ → /characters
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ 📷 Upload some assets           │   │ → /assets
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ 👀 Just explore the dashboard   │   │ → /operations
+│   └─────────────────────────────────┘   │
+│                                         │
+│   (Skip - take me to dashboard)         │
+│                                         │
+└─────────────────────────────────────────┘
+
+Purpose: Let user choose their entry point, feels personal
+
+### Step 4: First-Time Dashboard Hints
+- Show subtle tooltips/spotlights on key features
+- "This is your Operations Center" → "This is where you train characters"
+- Use a library like driver.js or custom overlay
+- Only show ONCE (store flag in profile.onboarding_complete)
+
+## Database Changes
+- profiles.onboarding_complete (boolean, default false)
+- profiles.first_login_at (timestamp)
+
+## What We're NOT Doing (for MVP)
+- Organization/team creation
+- Marketing questionnaire
+- Plan selection during signup
+- Invite codes
+- Phone verification
+
+
+================================================================================
+PART 3: AUTH FLOWS (Login, Reset, Sessions)
+================================================================================
+
+## 3.1 Login Flow (/login)
+
+┌─────────────────────────────────────────┐
+│                                         │
+│   [NATAK.io Logo]                       │
+│                                         │
+│   WELCOME BACK                          │
+│                                         │
+│   ┌─────────────────────────────────┐   │
+│   │ Email                           │   │
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ Password                        │   │
+│   └─────────────────────────────────┘   │
+│                                         │
+│   [Forgot password?]                    │
+│                                         │
+│   [  LOGIN  ] (Primary btn)             │
+│                                         │
+│   ─────── OR ───────                    │
+│                                         │
+│   [  Continue with Google  ]            │
+│                                         │
+│   Don't have an account? Sign up        │
+│                                         │
+└─────────────────────────────────────────┘
+
+After Login:
+- If first login → /onboarding/welcome
+- If returning → /operations (or last visited page)
+
+## 3.2 Password Reset Flow
+
+### Step A: Request Reset (/forgot-password)
+┌─────────────────────────────────────────┐
+│                                         │
+│   RESET YOUR PASSWORD                   │
+│                                         │
+│   Enter your email and we'll send       │
+│   you a reset link.                     │
+│                                         │
+│   ┌─────────────────────────────────┐   │
+│   │ Email                           │   │
+│   └─────────────────────────────────┘   │
+│                                         │
+│   [  SEND RESET LINK  ]                 │
+│                                         │
+│   ← Back to login                       │
+│                                         │
+└─────────────────────────────────────────┘
+
+Tech: supabase.auth.resetPasswordForEmail(email)
+
+### Step B: Check Email Screen
+┌─────────────────────────────────────────┐
+│                                         │
+│   ✉️ CHECK YOUR EMAIL                   │
+│                                         │
+│   We sent a reset link to:              │
+│   harsh@example.com                     │
+│                                         │
+│   Didn't receive it?                    │
+│   [Resend email]                        │
+│                                         │
+│   ← Back to login                       │
+│                                         │
+└─────────────────────────────────────────┘
+
+### Step C: Reset Password (/reset-password)
+User clicks link in email → lands here
+
+┌─────────────────────────────────────────┐
+│                                         │
+│   SET NEW PASSWORD                      │
+│                                         │
+│   ┌─────────────────────────────────┐   │
+│   │ New Password                    │   │
+│   └─────────────────────────────────┘   │
+│   ┌─────────────────────────────────┐   │
+│   │ Confirm Password                │   │
+│   └─────────────────────────────────┘   │
+│                                         │
+│   [  UPDATE PASSWORD  ]                 │
+│                                         │
+└─────────────────────────────────────────┘
+
+After Success:
+- Show "Password updated!" toast
+- Auto-login and redirect to /operations
+
+Tech: supabase.auth.updateUser({ password: newPassword })
+
+## 3.3 Session Management
+
+- Supabase handles sessions automatically
+- Tokens stored in cookies (httpOnly)
+- middleware.ts checks auth on protected routes
+- Auto-refresh tokens before expiry
+
+## 3.4 Routes Summary
+
+| Route              | Purpose                  | Protected? |
+|--------------------|--------------------------|------------|
+| /                  | Landing page             | No         |
+| /login             | Login form               | No         |
+| /signup            | Signup form              | No         |
+| /forgot-password   | Request reset            | No         |
+| /reset-password    | Set new password         | No (token) |
+| /onboarding/*      | First-time flow          | Yes        |
+| /operations        | Main dashboard           | Yes        |
+| /assets            | Asset DAM                | Yes        |
+| /characters        | Character management     | Yes        |
+| (all other /app)   | Protected pages          | Yes        |
+
+## Files to Create/Modify
+
+NEW FILES:
+- app/(auth)/signup/page.tsx
+- app/(auth)/login/page.tsx  
+- app/(auth)/forgot-password/page.tsx
+- app/(auth)/reset-password/page.tsx
+- app/(auth)/onboarding/welcome/page.tsx
+
+MODIFY:
+- middleware.ts (route protection logic)
+- schema.sql (add onboarding_complete column)
+
+================================================================================
+END OF DOCUMENT
+================================================================================
