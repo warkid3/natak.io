@@ -24,7 +24,7 @@ export const FAL_ENDPOINTS = {
     LTX_VIDEO_V2: 'fal-ai/ltx-video/v2',
 
     // Animation
-    WAN_ANIMATE: 'fal-ai/wan/v2.1/animate', // Corrected to 2.1 as per common naming, or stick to provided. User asked for 2.2. "v2.2-14b" was in file. I'll use that.
+    WAN_ANIMATE: 'fal-ai/wan/v2.2-14b/image-to-video',
 
     // Face Utils
     PULID_FLUX: 'fal-ai/flux/v1/pulid',

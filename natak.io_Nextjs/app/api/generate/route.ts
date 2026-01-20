@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
             prompt: prompt, // Initial prompt
             config: body,   // Store full config
             prompting_model: body.useGrok ? "xAI Grok Beta" : "None",
-            image_model: "Z-Image Turbo", // Default
-            video_model: body.generateVideo ? "LTX-2" : null,
+            image_model: body.imageModel || "Z-Image Turbo",
+            video_model: body.generateVideo ? (body.video_model || "LTX-2") : null,
             cost: cost // Record estimated cost
         }]).select().single();
 

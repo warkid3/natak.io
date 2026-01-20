@@ -33,8 +33,10 @@ We use **Route Groups** (folders in parentheses) to isolate layouts. These folde
 - **Studio**: [`app/(app)/studio/page.tsx`](app/(app)/studio/page.tsx) - Redirects to Assets (currently).
 
 ### 3. Authentication
-- **Login**: [`app/(auth)/login/page.tsx`](app/(auth)/login/page.tsx)
-- **Callback**: [`app/(auth)/auth/callback/page.tsx`](app/(auth)/auth/callback/page.tsx) - Handles Supabase OAuth.
+- **Login**: [`app/(auth)/login/page.tsx`](app/(auth)/login/page.tsx) - Custom Supabase Auth form.
+- **Signup**: [`app/(auth)/signup/page.tsx`](app/(auth)/signup/page.tsx) - Custom Supabase registration.
+- **Callback**: [`app/auth/callback/route.ts`](app/auth/callback/route.ts) - Server-side OAuth exchange.
+- **Middleware**: Session-based protection via `@supabase/ssr`.
 
 ---
 

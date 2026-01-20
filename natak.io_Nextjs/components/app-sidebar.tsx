@@ -1,9 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { LogOut } from "lucide-react";
 import {
     Home,
     BarChart3,
@@ -36,6 +39,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useCredits } from "@/hooks/use-credits";
 
 const navData = {
     workspace: [
@@ -56,11 +60,12 @@ const navData = {
         },
     ],
     create: [
-        {
-            title: "Creative Mode",
-            url: "/creative",
-            icon: Sparkles,
-        },
+        // Creative Mode hidden - different plans
+        // {
+        //     title: "Creative Mode",
+        //     url: "/creative",
+        //     icon: Sparkles,
+        // },
         {
             title: "Asset DAM",
             url: "/assets",
@@ -111,6 +116,79 @@ const navData = {
         },
     ],
 };
+
+
+function UserProfile() {
+    const [user, setUser] = React.useState<User | null>(null);
+    const router = useRouter();
+    const supabase = createClient();
+
+    React.useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        fetchUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
+
+    const { credits, tier, loading } = useCredits(user?.id);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+        router.refresh();
+    };
+
+    if (!user) return (
+        <div className="flex items-center gap-3 py-2 animate-pulse">
+            <div className="h-8 w-8 rounded-full bg-zinc-800" />
+            <div className="space-y-2">
+                <div className="h-2 w-20 bg-zinc-800 rounded" />
+                <div className="h-2 w-16 bg-zinc-800 rounded" />
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="flex items-center justify-between gap-3 group/user overflow-hidden">
+            <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="h-8 w-8 border border-white/10 ring-1 ring-white/5">
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarFallback className="bg-primary text-black text-[10px] font-black uppercase">
+                        {user.email?.substring(0, 2) || 'OP'}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-tight text-white truncate">
+                        {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 truncate">
+                            {tier}
+                        </span>
+                        <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                        <span className="text-[8px] font-bold text-primary font-mono">
+                            {loading ? '...' : credits} CR
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <button
+                onClick={handleSignOut}
+                className="p-2 opacity-0 group-hover/user:opacity-100 hover:bg-white/5 rounded-sm transition-all text-zinc-600 hover:text-red-500"
+                title="Decommission Session"
+            >
+                <LogOut className="h-4 w-4" />
+            </button>
+        </div>
+    );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
@@ -233,22 +311,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <SidebarRail />
 
-            <div className="border-t border-zinc-800 p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">Profile</span>
-                    <UserButton afterSignOutUrl="/" />
-                </div>
-                <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">Team</span>
-                    <OrganizationSwitcher
-                        appearance={{
-                            elements: {
-                                organizationPreviewTextContainer: "text-white",
-                                organizationSwitcherTrigger: "text-white hover:text-primary"
-                            }
-                        }}
-                    />
-                </div>
+            <div className="border-t border-zinc-800 p-4">
+                <UserProfile />
             </div>
         </Sidebar>
     );

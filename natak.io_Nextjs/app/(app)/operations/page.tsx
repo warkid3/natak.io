@@ -3,8 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { OperationsJob, PipelineStep, QualityStatus } from '@/types/operations';
 import { cn } from '@/lib/utils';
-import JobDetailsModal from '@/components/JobDetailsModal';
+import { ImageJobModal, VideoJobModal, MotionControlJobModal } from '@/components/modals';
 import { Grid3x3, List } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+
+// Helper to determine job type
+function getJobType(job: OperationsJob): 'image' | 'video' | 'motion_control' {
+    const config = job as any;
+    // Check for Motion Control (Wan 2.2)
+    if (config.video_model === 'Wan 2.2 Animate' || config.config?.video_model === 'Wan 2.2 Animate') {
+        return 'motion_control';
+    }
+    // Check for Video (LTX-2 or other video models)
+    if (job.format === 'Video' || config.video_model || config.config?.generateVideo) {
+        return 'video';
+    }
+    // Default to image
+    return 'image';
+}
 
 const STATUS_COLORS = {
     queued: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
@@ -20,6 +36,17 @@ export default function OperationsPage() {
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const [inspectedJob, setInspectedJob] = useState<OperationsJob | null>(null);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Get current user
+        const getUser = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) setUserId(user.id);
+        };
+        getUser();
+    }, []);
 
     useEffect(() => {
         fetchJobs();
@@ -50,6 +77,53 @@ export default function OperationsPage() {
             fetchJobs();
         } catch (error) {
             console.error(`${action} failed:`, error);
+        }
+    };
+
+    const handleSavePrompt = async (prompt: string, jobId: string) => {
+        if (!inspectedJob) return;
+
+        try {
+            const jobType = getJobType(inspectedJob);
+            const res = await fetch('/api/prompts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt,
+                    title: `${inspectedJob.character_name || 'Job'} - ${new Date().toLocaleDateString()}`,
+                    generationType: jobType,
+                    sourceJobId: jobId,
+                    modelConfig: (inspectedJob as any).config || null
+                })
+            });
+
+            if (res.ok) {
+                console.log('Prompt saved successfully');
+            }
+        } catch (error) {
+            console.error('Failed to save prompt:', error);
+        }
+    };
+
+    // Render the appropriate modal based on job type
+    const renderJobModal = () => {
+        if (!inspectedJob) return null;
+
+        const jobType = getJobType(inspectedJob);
+        const commonProps = {
+            job: inspectedJob,
+            onClose: () => setInspectedJob(null),
+            onAction: (action: 'retry' | 'approve' | 'reject') => handleAction(inspectedJob.id, action),
+            onSavePrompt: handleSavePrompt
+        };
+
+        switch (jobType) {
+            case 'motion_control':
+                return <MotionControlJobModal {...commonProps} />;
+            case 'video':
+                return <VideoJobModal {...commonProps} />;
+            default:
+                return <ImageJobModal {...commonProps} />;
         }
     };
 
@@ -124,13 +198,7 @@ export default function OperationsPage() {
                 <GridView jobs={jobs} onInspect={setInspectedJob} />
             )}
 
-            {inspectedJob && (
-                <JobDetailsModal
-                    job={inspectedJob}
-                    onClose={() => setInspectedJob(null)}
-                    onAction={(action) => handleAction(inspectedJob.id, action)}
-                />
-            )}
+            {renderJobModal()}
         </div>
     );
 }

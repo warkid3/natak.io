@@ -111,7 +111,7 @@ const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
     );
 };
 
-export default function PricingSection6() {
+export default function PricingSection6({ onSelectPlan }: { onSelectPlan?: (plan: string) => void }) {
     const [isYearly, setIsYearly] = useState(false);
     const pricingRef = useRef<HTMLDivElement>(null);
 
@@ -219,8 +219,8 @@ export default function PricingSection6() {
                     >
                         <Card
                             className={`relative h-full text-white border-white/10 ${plan.popular
-                                    ? "bg-neutral-900/80 shadow-[0px_0px_50px_-10px_rgba(223,255,0,0.15)] z-20 border-lime/30"
-                                    : "bg-neutral-950/50 backdrop-blur-sm z-10"
+                                ? "bg-neutral-900/80 shadow-[0px_0px_50px_-10px_rgba(223,255,0,0.15)] z-20 border-lime/30"
+                                : "bg-neutral-950/50 backdrop-blur-sm z-10"
                                 }`}
                         >
                             <CardHeader className="text-left ">
@@ -247,9 +247,10 @@ export default function PricingSection6() {
 
                             <CardContent className="pt-0">
                                 <button
+                                    onClick={() => onSelectPlan?.(plan.name)}
                                     className={`w-full mb-8 py-3 text-sm font-black uppercase tracking-widest rounded transition-all duration-300 ${plan.popular
-                                            ? "bg-lime text-black hover:shadow-[0_0_30px_rgba(223,255,0,0.4)] hover:-translate-y-1"
-                                            : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                                        ? "bg-lime text-black hover:shadow-[0_0_30px_rgba(223,255,0,0.4)] hover:-translate-y-1"
+                                        : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
                                         }`}
                                 >
                                     {plan.buttonText}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>natak.io Media Saver</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <span class="logo-text">natak<span class="accent">.</span>io</span>
+            </div>
+            <span class="version">v1.0</span>
+        </header>
+
+        <!-- Auth Section - Not Logged In -->
+        <div id="auth-section" class="section">
+            <div class="status disconnected">
+                <div class="status-dot"></div>
+                <span>Not Connected</span>
+            </div>
+            
+            <p class="description">
+                Enter your API key to save media directly to your Asset DAM.
+            </p>
+            
+            <div class="input-group">
+                <input type="password" id="api-key-input" placeholder="Enter API Key..." />
+                <button id="save-key-btn" class="btn primary">Connect</button>
+            </div>
+            
+            <a href="http://localhost:3000/settings" target="_blank" class="link">
+                Get your API key →
+            </a>
+        </div>
+
+        <!-- Connected Section -->
+        <div id="connected-section" class="section hidden">
+            <div class="status connected">
+                <div class="status-dot"></div>
+                <span>Connected</span>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-email" id="user-email">user@example.com</div>
+            </div>
+            
+            <div class="instructions">
+                <h3>How to use:</h3>
+                <ol>
+                    <li>Go to Instagram or Pinterest</li>
+                    <li>Hover over any image or video</li>
+                    <li>Click the <strong>Save</strong> button</li>
+                    <li>Media appears in your Asset DAM!</li>
+                </ol>
+            </div>
+            
+            <button id="disconnect-btn" class="btn secondary">Disconnect</button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>Works on Instagram & Pinterest</span>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

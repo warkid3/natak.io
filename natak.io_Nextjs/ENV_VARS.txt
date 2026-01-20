@@ -2,9 +2,9 @@
 # Copy these to .env.local and populate with your credentials
 
 # 1. SUPABASE (Database & Auth)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=https://szykpckfumwnzobtkxfw.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6eWtwY2tmdW13bnpvYnRreGZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzNzM3MzMsImV4cCI6MjA4Mzk0OTczM30.MSF_JPIIFMBo-ZGlw10tTTQhbg7x-b5MYw39fJFbTWU
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_4HBiOPhjhxSxt2AuHrYljA_3XRXYoj9
 
 # 2. CLOUDFLARE R2 (Storage)
 R2_ACCESS_KEY_ID=your-access-key-id

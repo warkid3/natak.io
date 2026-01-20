@@ -7,6 +7,7 @@ import { User as UserIcon, Settings2, Key, Terminal, Eye, EyeOff, Save, RefreshC
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { createClient } from '@/lib/supabase/client';
 
 type SettingsTab = 'general' | 'models' | 'api';
 
@@ -56,21 +57,35 @@ export default function SettingsPage() {
 
     const fetchSettings = async () => {
         try {
-            const userId = 'mock-user-id'; // TODO: Get from auth
-            const res = await fetch(`/api/settings?userId=${userId}`);
-            const data = await res.json();
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
 
-            setUser({
-                id: userId,
-                name: data.profile?.name || '',
-                email: data.profile?.email || '',
-                tier: data.profile?.tier || 'Pro'
-            } as User);
+            if (user) {
+                // Fetch profile/settings (mocking for now, but using real user ID)
+                setUser({
+                    id: user.id,
+                    name: user.user_metadata?.full_name || 'Operator',
+                    email: user.email || '',
+                    tier: 'Agency', // Force Agency tier for now to enable API tab
+                    // ... other fields
+                } as any);
 
-            setSettings(data.settings);
+                // Check for existing API key in metadata
+                const apiKey = user.user_metadata?.api_key;
+                if (apiKey) {
+                    setApiKey(apiKey);
+                } else {
+                    // Generate new if none
+                    const newKey = `nk_${user.id.substring(0, 8)}_${Math.random().toString(36).substring(2, 15)}`;
+                    setApiKey(newKey);
+                    // In a real app, we'd save this back to user metadata here
+                }
+            } else {
+                // Fallback to mockStore only if no auth
+                setUser(mockStore.getUser());
+            }
         } catch (error) {
             console.error('Failed to fetch settings:', error);
-            // Fallback to mockStore if API fails
             setUser(mockStore.getUser());
         } finally {
             setLoading(false);
@@ -79,7 +94,7 @@ export default function SettingsPage() {
 
     const handleSave = async () => {
         try {
-            const userId = 'mock-user-id';
+            const userId = user?.id || 'mock-user-id';
             await fetch('/api/settings', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -100,7 +115,14 @@ export default function SettingsPage() {
         }
     };
 
-    const API_KEY_MOCK = "NATAK_LIVE_ak_8234_9923_XLL_CORE_091";
+    const [apiKey, setApiKey] = useState("nk_live_std_8923_xll_991");
+
+    const refreshApiKey = () => {
+        if (!user) return;
+        const newKey = `nk_${user.id.substring(0, 8)}_${Math.random().toString(36).substring(2, 15)}`;
+        setApiKey(newKey);
+        // Save to backend would go here
+    };
 
     return (
         <div className="h-full flex flex-col space-y-10 overflow-hidden bg-black font-sans w-full p-2">
@@ -216,13 +238,16 @@ export default function SettingsPage() {
                                     <div className="space-y-6">
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-[11px] font-black text-primary uppercase tracking-[0.4em] italic">Live Production Keys</h3>
-                                            <button className="text-[9px] font-black text-slate-500 hover:text-white uppercase tracking-widest flex items-center gap-2 italic">
+                                            <button
+                                                onClick={refreshApiKey}
+                                                className="text-[9px] font-black text-slate-500 hover:text-white uppercase tracking-widest flex items-center gap-2 italic"
+                                            >
                                                 <RefreshCw className="w-3 h-3" /> Rotate Credentials
                                             </button>
                                         </div>
                                         <div className="bg-black border border-white/5 rounded-sm flex items-center p-2 group">
                                             <div className="flex-1 font-mono text-sm px-6 py-4 text-slate-400 select-all overflow-hidden truncate italic">
-                                                {showApiKey ? API_KEY_MOCK : "******************************************"}
+                                                {showApiKey ? apiKey : "******************************************"}
                                             </div>
                                             <button onClick={() => setShowApiKey(!showApiKey)} className="p-4 text-slate-600 hover:text-white transition-colors">
                                                 {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

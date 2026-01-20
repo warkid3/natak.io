@@ -72,7 +72,8 @@ export function Sidebar() {
                         <SidebarItem href="/operations" icon={<Home className="w-4 h-4" />} label="Operations Center" isActive={pathname === '/operations'} />
                         <SidebarItem href="/analytics" icon={<BarChart3 className="w-4 h-4" />} label="Analytics" isActive={pathname === '/analytics'} />
                         <SidebarItem href="/library" icon={<Image className="w-4 h-4" />} label="Library" isActive={pathname === '/library'} />
-                        <SidebarItem href="/creative" icon={<Sparkles className="w-4 h-4" />} label="Creative Mode" isActive={pathname === '/creative'} />
+                        {/* Creative Mode hidden - different plans */}
+                        {/* <SidebarItem href="/creative" icon={<Sparkles className="w-4 h-4" />} label="Creative Mode" isActive={pathname === '/creative'} /> */}
                         <SidebarItem href="/admin" icon={<Shield className="w-4 h-4" />} label="Admin Panel" isActive={pathname === '/admin'} />
                         <SidebarItem href="/assets" icon={<Layers className="w-4 h-4" />} label="Asset DAM" isActive={pathname === '/assets'} />
                         <SidebarItem href="/characters" icon={<UserCircle className="w-4 h-4" />} label="Characters" isActive={pathname === '/characters'} />

@@ -1,5 +1,5 @@
 
-export type Status = 'scraped' | 'queued' | 'processing' | 'review' | 'posted' | 'failed' | 'archived';
+export type Status = 'scraped' | 'queued' | 'processing' | 'review' | 'posted' | 'failed' | 'archived' | 'completed';
 
 export type PromptingModel = 'Gemini 1.5 Flash' | 'xAI Grok Beta';
 export type ImageModel = 'Pony Realism (SDXL)' | 'Nano Banana Pro' | 'Seedream 4.0' | 'Seedream 4.5';
