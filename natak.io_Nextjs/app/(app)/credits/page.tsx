@@ -1,185 +1,105 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { realStore } from '@/services/realStore';
-import { Transaction, User } from '@/types';
-import { Zap, ShieldCheck, Check, Clock, TrendingDown, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { CreditStoreSection } from '@/components/CreditStoreSection';
+import { PricingTable, PricingTableHeader, PricingTableRow, PricingTablePlan, PricingTableBody, PricingTableHead, PricingTableCell } from '@/components/ui/pricing-table';
 import { Button } from '@/components/ui/button';
+import { Shield, Users, Rocket } from 'lucide-react';
+import { FEATURES } from '@/app/(marketing)/pricing/page'; // Reuse feature list
 
-const PLANS = [
-    {
-        name: 'Influencer',
-        price: '$49',
-        credits: '5,000',
-        features: ['10 Identity Slots', 'SFW Only', 'Standard Speed'],
-        color: 'slate-500'
-    },
-    {
-        name: 'Pro',
-        price: '$129',
-        credits: '15,000',
-        features: ['50 Identity Slots', 'NSFW Bypassing', 'Priority Rendering', '4K Video'],
-        color: '[#CCFF00]',
-        popular: true
-    },
-    {
-        name: 'Agency',
-        price: '$499',
-        credits: 'Unlimited*',
-        features: ['Unlimited Identities', 'Custom LoRA Training', 'API Access', 'Dedicated Support'],
-        color: 'white'
-    }
-];
-
-const PACKS = [
-    { name: 'Starter Pack', amount: '1,000', price: '$15' },
-    { name: 'Studio Pack', amount: '5,000', price: '$50', bestValue: true },
-    { name: 'Agency Pack', amount: '25,000', price: '$199' }
-];
-
-export default function CreditStorePage() {
-    const [user, setUser] = useState<User | null>(null);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-    useEffect(() => {
-        const loadData = async () => {
-            const [userData, txData] = await Promise.all([
-                realStore.getUser(),
-                realStore.getTransactions()
-            ]);
-            setUser(userData);
-            setTransactions(txData);
-        };
-        loadData();
-    }, []);
-
+export default function CreditsPage() {
     return (
-        <div className="h-full flex flex-col space-y-10 overflow-y-auto custom-scrollbar pr-2 bg-black font-sans w-full p-2">
-            <header className="flex-shrink-0 bg-surface p-12 rounded-sm border border-white/5 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[120px]"></div>
-                <div className="relative z-10 flex justify-between items-end">
-                    <div>
-                        <h1 className="text-4xl font-[900] italic tracking-tighter text-white uppercase leading-none">Resource Command</h1>
-                        <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em] mt-3 italic">Monetization & Token Logistics</p>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest italic block mb-1">Current Active Plan</span>
-                        <div className="flex items-center gap-3">
-                            <ShieldCheck className="w-5 h-5 text-primary" />
-                            <span className="text-2xl font-[900] text-white italic uppercase tracking-tighter">{user?.tier || 'PRO'} OPERATOR</span>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-violet-500/30 p-4 md:p-8 overflow-y-auto custom-scrollbar">
+            <main className="w-full max-w-6xl mx-auto space-y-20">
+
+                {/* Header */}
+                <div className="text-center space-y-4 pt-10">
+                    <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white">
+                        Resource <span className="text-primary">Command</span>
+                    </h1>
+                    <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">
+                        Manage your subscription tier and available computing credits.
+                    </p>
                 </div>
-            </header>
 
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-12">
-                {PLANS.map(plan => (
-                    <div key={plan.name} className={cn(
-                        "relative bg-[#0F0F11] border-2 rounded-sm p-10 flex flex-col transition-all duration-500 hover:scale-[1.02]",
-                        plan.popular ? 'border-primary shadow-[0_20px_80px_rgba(204,255,0,0.1)]' : 'border-white/5'
-                    )}>
-                        {plan.popular && (
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black px-6 py-1 text-[9px] font-black uppercase tracking-widest italic rounded-sm shadow-2xl">Recommended</div>
-                        )}
-                        <div className="mb-10">
-                            <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] italic mb-2">{plan.name} Tier</h3>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-5xl font-[900] text-white italic tracking-tighter">{plan.price}</span>
-                                <span className="text-slate-700 font-black uppercase text-[10px] tracking-widest">/ Month</span>
-                            </div>
-                        </div>
+                {/* Subscription Section */}
+                <section>
+                    <div className="flex items-center justify-center mb-8 gap-4">
+                        <div className="h-px bg-zinc-800 w-20"></div>
+                        <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Active Subscription Plans</h2>
+                        <div className="h-px bg-zinc-800 w-20"></div>
+                    </div>
 
-                        <div className="flex-1 space-y-4 mb-10">
-                            <div className="bg-black/50 p-6 rounded-sm border border-white/5 mb-6">
-                                <div className="flex items-center gap-3 mb-1">
-                                    <Zap className="w-4 h-4 text-primary fill-primary" />
-                                    <span className="text-xl font-[900] text-white italic">{plan.credits}</span>
-                                </div>
-                                <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">Monthly Token Infusion</span>
-                            </div>
-                            {plan.features.map(f => (
-                                <div key={f} className="flex items-center gap-3 text-slate-400 group">
-                                    <Check className="w-3.5 h-3.5 text-slate-800 group-hover:text-primary transition-colors" />
-                                    <span className="text-[11px] font-black uppercase tracking-widest italic transition-colors group-hover:text-white">{f}</span>
-                                </div>
+                    {/* We reuse the Pricing Table UI logic here but adapted for 'Upgrade' context */}
+                    <PricingTable className="mx-auto max-w-5xl">
+                        <PricingTableHeader>
+                            <PricingTableRow>
+                                <th />
+                                <th className="p-1">
+                                    <PricingTablePlan
+                                        name="OPERATOR"
+                                        badge="Current Plan"
+                                        price="$29"
+                                        compareAt="$49"
+                                        icon={Shield}
+                                    >
+                                        <Button disabled className="w-full rounded-lg bg-zinc-800 text-zinc-400 border border-zinc-700" size="lg">
+                                            Active
+                                        </Button>
+                                    </PricingTablePlan>
+                                </th>
+                                <th className="p-1">
+                                    <PricingTablePlan
+                                        name="DIRECTOR"
+                                        badge="Recommended"
+                                        price="$79"
+                                        compareAt="$99"
+                                        icon={Users}
+                                        className="border-lime/50 bg-lime/5"
+                                    >
+                                        <Button
+                                            className="w-full rounded-lg bg-lime text-black hover:bg-lime/90 font-bold"
+                                            size="lg"
+                                        >
+                                            Upgrade
+                                        </Button>
+                                    </PricingTablePlan>
+                                </th>
+                                <th className="p-1">
+                                    <PricingTablePlan
+                                        name="EXECUTIVE"
+                                        badge="Agency Scale"
+                                        price="$199"
+                                        compareAt="$299"
+                                        icon={Rocket}
+                                    >
+                                        <Button variant="outline" className="w-full rounded-lg hover:bg-white hover:text-black transition-all" size="lg">
+                                            Contact Sales
+                                        </Button>
+                                    </PricingTablePlan>
+                                </th>
+                            </PricingTableRow>
+                        </PricingTableHeader>
+                        <PricingTableBody>
+                            {FEATURES.map((feature, index) => (
+                                <PricingTableRow key={index}>
+                                    <PricingTableHead className="text-zinc-500 font-mono uppercase text-[10px] tracking-wider">{feature.label}</PricingTableHead>
+                                    {feature.values.map((value, index) => (
+                                        <PricingTableCell key={index} className="text-zinc-300 font-bold text-xs text-center">{value}</PricingTableCell>
+                                    ))}
+                                </PricingTableRow>
                             ))}
-                        </div>
-
-                        <Button
-                            variant={plan.popular ? 'natak' : 'outline'}
-                            className="w-full py-5 h-auto text-sm"
-                        >
-                            Initiate License
-                        </Button>
-                    </div>
-                ))}
-            </section>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 pb-20 px-12">
-                {/* Top-Up Packs */}
-                <section className="bg-[#1A1A1D]/30 border border-white/5 rounded-sm p-10 flex flex-col h-fit">
-                    <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
-                        <Zap className="w-6 h-6 text-primary" />
-                        <h2 className="text-2xl font-[900] italic uppercase tracking-tighter">One-Time Refills</h2>
-                    </div>
-                    <div className="space-y-4">
-                        {PACKS.map(pack => (
-                            <div key={pack.name} className="flex items-center justify-between bg-black p-6 rounded-sm border border-white/5 group hover:border-primary/40 transition-all cursor-pointer">
-                                <div className="flex items-center gap-8">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest mb-1 italic">{pack.name}</span>
-                                        <span className="text-2xl font-[900] text-white italic tracking-tighter">+{pack.amount} CR</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <span className="text-xl font-[900] text-primary italic">{pack.price}</span>
-                                    <button className="bg-white/5 text-white p-3 rounded-sm group-hover:bg-primary group-hover:text-black transition-all">
-                                        <ArrowUpRight className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                        </PricingTableBody>
+                    </PricingTable>
                 </section>
 
-                {/* Transaction History */}
-                <section className="bg-[#1A1A1D]/30 border border-white/5 rounded-sm p-10 flex flex-col">
-                    <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
-                        <Clock className="w-6 h-6 text-slate-600" />
-                        <h2 className="text-2xl font-[900] italic uppercase tracking-tighter">Transaction Log</h2>
-                    </div>
-                    <div className="overflow-hidden">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="text-slate-700 text-[9px] font-black uppercase tracking-[0.3em] border-b border-white/5">
-                                    <th className="pb-4">Operation</th>
-                                    <th className="pb-4">Timestamp</th>
-                                    <th className="pb-4 text-right">Impact</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {transactions.map(tx => (
-                                    <tr key={tx.id} className="group hover:bg-white/[0.02] transition-all">
-                                        <td className="py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-black text-slate-400 uppercase italic group-hover:text-white transition-colors">{tx.description}</span>
-                                                <span className="text-[8px] font-black text-slate-800 uppercase tracking-widest">ID: {tx.id.toUpperCase()}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-5 text-[10px] font-black text-slate-700 italic uppercase">
-                                            {new Date(tx.timestamp).toLocaleDateString()}
-                                        </td>
-                                        <td className={cn("py-5 text-right font-[900] italic", tx.type === 'debit' ? 'text-red-500' : 'text-primary')}>
-                                            {tx.type === 'debit' ? '-' : '+'}{tx.amount}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
+                {/* Credit Store Section */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none"></div>
+                    <CreditStoreSection />
+                </div>
+
+            </main>
         </div>
     );
 }

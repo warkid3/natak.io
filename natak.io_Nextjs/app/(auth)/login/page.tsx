@@ -5,6 +5,7 @@ import { AuthLayout, GlassInputWrapper, GoogleIcon, Testimonial } from "@/compon
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 
 const sampleTestimonials: Testimonial[] = [];
 
@@ -12,22 +13,42 @@ export default function LoginPage() {
     const router = useRouter();
     const supabase = createClient();
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setLoading(true);
+        setError(null);
+
         const formData = new FormData(event.currentTarget);
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
 
-        if (error) {
-            alert(error.message);
-        } else {
-            router.push('/assets');
+        if (signInError) {
+            setError(signInError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Check onboarding status
+        if (data?.user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('onboarding_status')
+                .eq('id', data.user.id)
+                .single();
+
+            if (profile?.onboarding_status && profile.onboarding_status !== 'completed') {
+                router.push('/onboarding');
+            } else {
+                router.push('/assets');
+            }
             router.refresh();
         }
     };
@@ -42,8 +63,7 @@ export default function LoginPage() {
     };
 
     const handleResetPassword = () => {
-        alert("Redirecting to secure password reset portal...");
-        // Implement real reset flow if needed
+        router.push('/forgot-password');
     }
 
     const handleCreateAccount = () => {
@@ -85,8 +105,14 @@ export default function LoginPage() {
                     <a href="#" onClick={(e) => { e.preventDefault(); handleResetPassword?.(); }} className="hover:underline text-primary transition-colors">Forgot Password?</a>
                 </div>
 
-                <button type="submit" className="w-full rounded-2xl bg-primary py-4 font-black text-[12px] uppercase tracking-[0.2em] text-black hover:bg-primary/90 transition-all shadow-[0_20px_40px_rgba(204,255,0,0.2)]">
-                    Sign In
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold p-3 rounded-sm uppercase tracking-wider">
+                        {error}
+                    </div>
+                )}
+
+                <button type="submit" disabled={loading} className="w-full rounded-2xl bg-primary py-4 font-black text-[12px] uppercase tracking-[0.2em] text-black hover:bg-primary/90 transition-all shadow-[0_20px_40px_rgba(204,255,0,0.2)] disabled:opacity-50">
+                    {loading ? 'SIGNING IN...' : 'SIGN IN'}
                 </button>
             </form>
 

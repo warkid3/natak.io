@@ -1,147 +1,267 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    AreaChart, Area, PieChart, Pie, Cell
+    AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
+import { Loader2, TrendingUp, AlertCircle, Zap, CheckCircle2, CreditCard } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-const MOCK_HISTORICAL_DATA = [
-    { name: 'Mon', spend: 400, approved: 120, rejected: 20 },
-    { name: 'Tue', spend: 300, approved: 98, rejected: 15 },
-    { name: 'Wed', spend: 600, approved: 180, rejected: 45 },
-    { name: 'Thu', spend: 800, approved: 240, rejected: 30 },
-    { name: 'Fri', spend: 500, approved: 150, rejected: 10 },
-    { name: 'Sat', spend: 200, approved: 60, rejected: 5 },
-    { name: 'Sun', spend: 100, approved: 30, rejected: 2 },
-];
+interface AnalyticsData {
+    kpi: {
+        creditsRemaining: number;
+        creditsUsedWeek: number;
+        totalCompleted: number;
+        successRate: number;
+    };
+    charts: {
+        usage: { name: string; date: string; credits: number }[];
+        topCharacters: { name: string; count: number }[];
+        typeSplit: { name: string; value: number; fill: string }[];
+    };
+}
 
-const QUALITY_DATA = [
-    { name: 'Approved', value: 82 },
-    { name: 'User Error', value: 12 },
-    { name: 'System Error', value: 6 },
-];
-
-const COLORS = ['#10b981', '#64748b', '#f43f5e'];
+const COLORS = ['#3b82f6', '#eab308', '#10b981', '#f43f5e'];
 
 export default function AnalyticsPage() {
-    return (
-        <div className="min-h-screen bg-[#0a0a0b] text-white p-8 space-y-6">
-            <header>
-                <h1 className="text-2xl font-bold">Operational Performance</h1>
-                <p className="text-zinc-500 text-sm">Real-time health of the content assembly line</p>
-            </header>
+    const [data, setData] = useState<AnalyticsData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/analytics');
+            if (!res.ok) throw new Error('Failed to load data');
+            const json = await res.json();
+            setData(json);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-4">
+                <AlertCircle className="w-12 h-12 text-red-500" />
+                <p className="text-white font-bold">Failed to load analytics</p>
+                <Button onClick={fetchData} variant="outline">Retry</Button>
+            </div>
+        );
+    }
+
+    if (!data) return null;
+
+    return (
+        <div className="min-h-screen bg-[#0a0a0b] text-white p-8 space-y-8 animate-in fade-in duration-500">
+            {/* Header Removed as requested */}
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    { label: 'Accept Rate', value: '82.4%', sub: '+2.1% from target', color: 'text-emerald-500' },
-                    { label: 'Refund Rate', value: '4.8%', sub: 'Target <5%', color: 'text-emerald-500' },
-                    { label: 'Avg QC Time', value: '24s', sub: 'Target <30s', color: 'text-blue-500' },
-                    { label: 'Daily Throughput', value: '1,420', sub: 'Jobs/24h', color: 'text-white' },
-                ].map((kpi, i) => (
-                    <div key={i} className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
-                        <div className="text-xs text-zinc-500 font-medium uppercase mb-1">{kpi.label}</div>
-                        <div className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</div>
-                        <div className="text-[10px] text-zinc-600 mt-1 uppercase font-bold tracking-tight">{kpi.sub}</div>
-                    </div>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <KpiCard
+                    label="Credits Remaining"
+                    value={data.kpi.creditsRemaining.toLocaleString()}
+                    sub="Available Balance"
+                    icon={<CreditCard className="w-4 h-4 text-primary" />}
+                    trend="Balance"
+                />
+                <KpiCard
+                    label="7-Day Consumption"
+                    value={data.kpi.creditsUsedWeek.toLocaleString()}
+                    sub="Credits Used"
+                    icon={<Zap className="w-4 h-4 text-amber-500" />}
+                    trend="Spending"
+                />
+                <KpiCard
+                    label="Total Output"
+                    value={data.kpi.totalCompleted.toLocaleString()}
+                    sub="Jobs Completed"
+                    icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                    trend="Lifetime"
+                />
+                <KpiCard
+                    label="Success Rate"
+                    value={`${data.kpi.successRate.toFixed(1)}%`}
+                    sub="System Health"
+                    icon={<TrendingUp className="w-4 h-4 text-blue-500" />}
+                    trend="Target > 95%"
+                />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Credit Utilization */}
-                <div className="lg:col-span-2 p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-                    <h3 className="text-sm font-semibold mb-6">Credit Spend vs Production (7D)</h3>
-                    <div className="h-[300px] w-full">
+            {/* Main Charts Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                {/* Usage Trend */}
+                <Card className="lg:col-span-2 bg-[#1A1A1D] border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-bold text-white uppercase tracking-wide">Usage Trend</CardTitle>
+                        <CardDescription className="text-slate-500 text-xs uppercase tracking-widest">
+                            Credit consumption over last 30 days
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={MOCK_HISTORICAL_DATA}>
+                            <AreaChart data={data.charts.usage}>
                                 <defs>
                                     <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                                <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#e4e4e7' }}
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                <XAxis
+                                    dataKey="name"
+                                    stroke="#666"
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    minTickGap={30}
                                 />
-                                <Area type="monotone" dataKey="spend" stroke="#4f46e5" fillOpacity={1} fill="url(#colorSpend)" />
+                                <YAxis
+                                    stroke="#666"
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(value) => `${value}`}
+                                />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#000', borderColor: '#333', borderRadius: '4px' }}
+                                    itemStyle={{ color: '#CCFF00', fontWeight: 'bold' }}
+                                    cursor={{ stroke: '#CCFF00', strokeWidth: 1 }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="credits"
+                                    stroke="#CCFF00"
+                                    strokeWidth={2}
+                                    fillOpacity={1}
+                                    fill="url(#colorSpend)"
+                                />
                             </AreaChart>
                         </ResponsiveContainer>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
-                {/* Quality Triage */}
-                <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col">
-                    <h3 className="text-sm font-semibold mb-6">Output Yield Triage</h3>
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie
-                                    data={QUALITY_DATA}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {QUALITY_DATA.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="space-y-3 w-full mt-4">
-                            {QUALITY_DATA.map((item, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-xs">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
-                                        <span className="text-zinc-400">{item.name}</span>
-                                    </div>
-                                    <span className="font-bold">{item.value}%</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottleneck Monitor */}
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-                <h3 className="text-sm font-semibold mb-6">Pipeline Velocity & Health</h3>
-                <div className="grid grid-cols-5 gap-4">
-                    {[
-                        { name: 'Base Gen', time: '45s', health: 98, status: 'Normal' },
-                        { name: 'Cloth Swap', time: '82s', health: 72, status: 'Warning' },
-                        { name: 'Upscale', time: '65s', health: 95, status: 'Normal' },
-                        { name: 'Video Prep', time: '142s', health: 88, status: 'Slow' },
-                        { name: 'Render', time: '12s', health: 99, status: 'Normal' },
-                    ].map((step, idx) => (
-                        <div key={idx} className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
-                            <div className="text-[10px] text-zinc-500 uppercase font-bold mb-2">{step.name}</div>
-                            <div className="text-lg font-bold mb-1">{step.time}</div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex-1 bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full ${step.health > 90 ? 'bg-emerald-500' : step.health > 80 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                                        style={{ width: `${step.health}%` }}
+                {/* Content Split */}
+                <Card className="bg-[#1A1A1D] border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-bold text-white uppercase tracking-wide">Production Type</CardTitle>
+                        <CardDescription className="text-slate-500 text-xs uppercase tracking-widest">
+                            Image vs Video Split
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[300px] flex items-center justify-center">
+                        {data.charts.typeSplit.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={data.charts.typeSplit}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {data.charts.typeSplit.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} stroke="rgba(0,0,0,0.5)" />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#000', borderColor: '#333', borderRadius: '4px' }}
+                                        itemStyle={{ color: '#fff' }}
                                     />
-                                </div>
-                                <span className={`text-[10px] font-bold ${step.status === 'Warning' ? 'text-rose-500' : step.status === 'Slow' ? 'text-amber-500' : 'text-zinc-500'}`}>
-                                    {step.status}
-                                </span>
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        iconType="circle"
+                                        formatter={(value) => <span className="text-slate-400 text-xs font-bold uppercase ml-1">{value}</span>}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="text-center text-slate-600">
+                                <p className="text-xs uppercase tracking-widest">No data available</p>
                             </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Bottom Row: Top Models */}
+            <Card className="bg-[#1A1A1D] border-white/5">
+                <CardHeader>
+                    <CardTitle className="text-lg font-bold text-white uppercase tracking-wide">Top Models</CardTitle>
+                    <CardDescription className="text-slate-500 text-xs uppercase tracking-widest">
+                        Most frequently used characters/LoRAs
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="h-[250px]">
+                    {data.charts.topCharacters.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.charts.topCharacters} layout="vertical" margin={{ left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                                <XAxis type="number" stroke="#666" fontSize={10} hide />
+                                <YAxis
+                                    dataKey="name"
+                                    type="category"
+                                    stroke="#9ca3af"
+                                    fontSize={11}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    width={120}
+                                />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#000', borderColor: '#333', borderRadius: '4px' }}
+                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                />
+                                <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-slate-600">
+                            <p className="text-xs uppercase tracking-widest">No character usage data</p>
                         </div>
-                    ))}
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+
+function KpiCard({ label, value, sub, icon, trend }: { label: string, value: string, sub: string, icon: React.ReactNode, trend: string }) {
+    return (
+        <div className="bg-[#1A1A1D] border border-white/5 rounded-sm p-6 relative overflow-hidden group hover:border-white/10 transition-colors">
+            <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-white/5 rounded-sm text-slate-400 group-hover:text-white transition-colors">
+                    {icon}
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 italic">
+                    {trend}
+                </span>
+            </div>
+            <div className="space-y-1">
+                <h3 className="text-3xl font-[900] italic text-white tracking-tighter">{value}</h3>
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</span>
+                    <span className="text-[9px] text-slate-600 uppercase tracking-wide mt-1">{sub}</span>
                 </div>
             </div>
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-2xl group-hover:from-primary/10 transition-all" />
         </div>
     );
 }

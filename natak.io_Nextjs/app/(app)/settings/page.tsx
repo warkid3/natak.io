@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, ImageModel, VideoModel } from '@/types';
-import { User as UserIcon, Settings2, Key, Terminal, Eye, EyeOff, Save, RefreshCw, Copy, Check } from 'lucide-react';
+import { User as UserIcon, Settings2, Key, Terminal, Eye, EyeOff, Save, RefreshCw, Copy, Check, Users, Mail, Trash2, Shield, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
+import { Invitation } from '@/lib/invitations';
 
-type SettingsTab = 'general' | 'models' | 'api';
+type SettingsTab = 'general' | 'team' | 'models' | 'api';
 
 const TabButton = ({ active, onClick, label, icon }: { active: boolean, onClick: () => void, label: string, icon: React.ReactNode }) => (
     <button
@@ -45,6 +46,14 @@ export default function SettingsPage() {
     const [showApiKey, setShowApiKey] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // Team state
+    const [invitations, setInvitations] = useState<Invitation[]>([]);
+    const [seats, setSeats] = useState<{ total: number; used: number; available: number } | null>(null);
+    const [newInviteEmail, setNewInviteEmail] = useState('');
+    const [inviteLoading, setInviteLoading] = useState(false);
+    const [inviteError, setInviteError] = useState<string | null>(null);
+    const [revokeLoading, setRevokeLoading] = useState<string | null>(null);
 
     // These states are strictly local here as they weren't in mockStore type
     const [defaultImageModel, setDefaultImageModel] = useState<ImageModel>('Pony Realism (SDXL)');
@@ -97,6 +106,67 @@ export default function SettingsPage() {
         }
     };
 
+    // Fetch team data when switching to team tab
+    useEffect(() => {
+        if (activeTab === 'team') {
+            fetchTeamData();
+        }
+    }, [activeTab]);
+
+    const fetchTeamData = async () => {
+        try {
+            const response = await fetch('/api/invitations');
+            if (response.ok) {
+                const data = await response.json();
+                setInvitations(data.invitations || []);
+                setSeats(data.seats || null);
+            }
+        } catch (error) {
+            console.error('Failed to fetch team data:', error);
+        }
+    };
+
+    const handleInvite = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newInviteEmail) return;
+
+        setInviteLoading(true);
+        setInviteError(null);
+
+        try {
+            const response = await fetch('/api/invitations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: newInviteEmail, role: 'member' }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setInviteError(data.error || 'Failed to send invitation');
+            } else {
+                setNewInviteEmail('');
+                fetchTeamData(); // Refresh list
+            }
+        } catch (error) {
+            setInviteError('Failed to send invitation');
+        } finally {
+            setInviteLoading(false);
+        }
+    };
+
+    const handleRevoke = async (id: string) => {
+        if (!confirm('Are you sure you want to revoke this invitation?')) return;
+
+        setRevokeLoading(id);
+        try {
+            await fetch(`/api/invitations?id=${id}`, { method: 'DELETE' });
+            fetchTeamData();
+        } finally {
+            setRevokeLoading(null);
+        }
+    };
+
     const handleSave = async () => {
         try {
             const userId = user?.id || 'mock-user-id';
@@ -138,6 +208,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex bg-black p-1 rounded-sm border border-white/5">
                     <TabButton active={activeTab === 'general'} onClick={() => setActiveTab('general')} label="General" icon={<UserIcon className="w-4 h-4" />} />
+                    <TabButton active={activeTab === 'team'} onClick={() => setActiveTab('team')} label="Team" icon={<Users className="w-4 h-4" />} />
                     <TabButton active={activeTab === 'models'} onClick={() => setActiveTab('models')} label="Inference" icon={<Settings2 className="w-4 h-4" />} />
                     <TabButton active={activeTab === 'api'} onClick={() => setActiveTab('api')} label="API Hub" icon={<Key className="w-4 h-4" />} />
                 </div>
@@ -173,6 +244,105 @@ export default function SettingsPage() {
                         >
                             {isSaved ? <><Check className="w-5 h-5 mr-3" /> Protocol Saved</> : <><Save className="w-5 h-5 mr-3" /> Update Profile</>}
                         </Button>
+                    </div>
+                )}
+
+                {activeTab === 'team' && (
+                    <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* Seat Usage */}
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-[#1A1A1D] border border-white/5 p-6 rounded-sm">
+                                <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2">Plan limit</h4>
+                                <div className="text-2xl font-black text-white">{seats?.total || 0} SEATS</div>
+                            </div>
+                            <div className="bg-[#1A1A1D] border border-white/5 p-6 rounded-sm">
+                                <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2">Active Members</h4>
+                                <div className="text-2xl font-black text-primary">{seats?.used || 0}</div>
+                            </div>
+                            <div className="bg-[#1A1A1D] border border-white/5 p-6 rounded-sm">
+                                <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2">Available</h4>
+                                <div className="text-2xl font-black text-slate-400">{seats?.available || 0}</div>
+                            </div>
+                        </div>
+
+                        {/* Invite Form */}
+                        <section className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-[900] italic uppercase tracking-tighter text-white">Invite Members</h3>
+                                {seats && seats.available <= 0 && (
+                                    <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-3 py-1 rounded-sm border border-red-500/20">SEAT LIMIT REACHED</span>
+                                )}
+                            </div>
+                            <form onSubmit={handleInvite} className="flex gap-4">
+                                <div className="flex-1">
+                                    <Input
+                                        value={newInviteEmail}
+                                        onChange={(e) => setNewInviteEmail(e.target.value)}
+                                        placeholder="colleague@company.com"
+                                        className="h-12 bg-black border-white/10"
+                                        disabled={seats?.available === 0}
+                                    />
+                                </div>
+                                <Button
+                                    type="submit"
+                                    disabled={!newInviteEmail || inviteLoading || seats?.available === 0}
+                                    className="h-12 px-8 bg-primary text-black font-black uppercase tracking-widest hover:bg-white transition-colors"
+                                >
+                                    {inviteLoading ? 'Wait...' : 'Send Invite'}
+                                </Button>
+                            </form>
+                            {inviteError && (
+                                <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{inviteError}</p>
+                            )}
+                        </section>
+
+                        {/* Invitations List */}
+                        <section className="space-y-6">
+                            <h3 className="text-xl font-[900] italic uppercase tracking-tighter text-white border-b border-white/5 pb-4">Pending Invitations</h3>
+
+                            {invitations.length === 0 ? (
+                                <div className="text-center py-12 text-slate-600 text-[10px] font-black uppercase tracking-widest italic">
+                                    No pending invitations
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {invitations.map((invite) => (
+                                        <div key={invite.id} className="flex items-center justify-between bg-[#1A1A1D] border border-white/5 p-4 rounded-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center">
+                                                    <Mail className="w-4 h-4 text-slate-400" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-white font-bold text-sm">{invite.email}</div>
+                                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                                                        Role: {invite.role} • Expires in {Math.ceil((new Date(invite.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className={cn(
+                                                    "text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-sm",
+                                                    invite.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
+                                                        invite.status === 'accepted' ? "bg-primary/10 text-primary" :
+                                                            "bg-red-500/10 text-red-500"
+                                                )}>
+                                                    {invite.status}
+                                                </span>
+                                                {invite.status === 'pending' && (
+                                                    <button
+                                                        onClick={() => handleRevoke(invite.id)}
+                                                        disabled={revokeLoading === invite.id}
+                                                        className="p-2 hover:bg-white/10 rounded-sm transition-colors text-slate-500 hover:text-red-500"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
                     </div>
                 )}
 
@@ -213,7 +383,7 @@ export default function SettingsPage() {
                                 <div className="space-y-2">
                                     <h4 className="text-[11px] font-black uppercase text-red-500 tracking-[0.2em] italic">Experimental Protocols</h4>
                                     <p className="text-[10px] text-red-500/60 font-black uppercase tracking-widest leading-relaxed">
-                                        Bypassing Safety Logic (NSFW) is permanent for this session. Use caution with public manifestations.
+                                        Accessing Unfiltered Models is permanent for this session. Use caution with public manifestations.
                                     </p>
                                 </div>
                             </div>

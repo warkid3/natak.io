@@ -34,17 +34,26 @@ class RealStore {
 
     // JOBS & REALTIME
     async getJobs(): Promise<GenerationJob[]> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
         const { data } = await supabase
             .from('jobs')
             .select('*')
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false });
         return data || [];
     }
 
-    subscribeToJobs(callback: (payload: any) => void) {
+    subscribeToJobs(userId: string, callback: (payload: any) => void) {
         return supabase
             .channel('public:jobs')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, callback)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'jobs',
+                filter: `user_id=eq.${userId}`
+            }, callback)
             .subscribe();
     }
 
@@ -59,12 +68,25 @@ class RealStore {
     }
 
     async updateJob(id: string, updates: Partial<GenerationJob>) {
-        return await supabase.from('jobs').update(updates).eq('id', id);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Ensure we only update our own jobs (if RLS is missing)
+        return await supabase.from('jobs')
+            .update(updates)
+            .eq('id', id)
+            .eq('user_id', user.id);
     }
 
     // ASSETS
     async getAssets(): Promise<Asset[]> {
-        const { data } = await supabase.from('assets').select('*').order('created_at', { ascending: false });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('assets')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
         return data || [];
     }
 
@@ -76,7 +98,13 @@ class RealStore {
 
     // CHARACTERS
     async getCharacters(): Promise<CharacterModel[]> {
-        const { data } = await supabase.from('characters').select('*').order('created_at', { ascending: false });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('characters')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
         return data || [];
     }
 
@@ -88,24 +116,47 @@ class RealStore {
 
     // TRANSACTIONS
     async getTransactions(): Promise<Transaction[]> {
-        const { data } = await supabase.from('credits_ledger').select('*').order('timestamp', { ascending: false });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('credits_ledger')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false });
         return data || [];
     }
 
     // NOTIFICATIONS
     async getNotifications(): Promise<Notification[]> {
-        const { data } = await supabase.from('notifications').select('*').order('timestamp', { ascending: false });
-        // Note: I didn't add the notification table to SQL yet, I should probably add it or use an enum
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false });
         return data || [];
     }
 
     async markNotificationRead(id: string) {
-        return await supabase.from('notifications').update({ read: true }).eq('id', id);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        return await supabase.from('notifications')
+            .update({ read: true })
+            .eq('id', id)
+            .eq('user_id', user.id);
     }
 
     // TICKETS
     async getTickets(): Promise<Ticket[]> {
-        const { data } = await supabase.from('tickets').select('*').order('timestamp', { ascending: false });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('tickets')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false });
         return data || [];
     }
 
@@ -117,7 +168,12 @@ class RealStore {
 
     // PROMPTS
     async getStarredPrompts(): Promise<string[]> {
-        const { data } = await supabase.from('starred_prompts').select('text');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data } = await supabase.from('starred_prompts')
+            .select('text')
+            .eq('user_id', user.id);
         return data?.map(d => d.text) || [];
     }
 

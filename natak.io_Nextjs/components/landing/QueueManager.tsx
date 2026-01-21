@@ -7,13 +7,13 @@ import { JobInspectorPanel } from './JobInspectorPanel';
 
 const MOCK_JOBS: Job[] = [
     { id: 'JOB-001', character: 'Model_A_V2', platform: 'Instagram', isNSFW: false, format: 'Video', status: JobStatus.PROCESSING, currentStep: PipelineStep.VIDEO_PREP, progress: 65, timestamp: '14:20:05', cost: 0.15, retryCount: 0 },
-    { id: 'JOB-002', character: 'Brand_Amb_01', platform: 'Twitter', isNSFW: true, format: 'Photo', status: JobStatus.FAILED, currentStep: PipelineStep.UPSCALE, progress: 40, timestamp: '14:21:12', cost: 0.02, error: 'Server Timeout', retryCount: 1 },
+    { id: 'JOB-002', character: 'Brand_Amb_01', platform: 'Twitter', isNSFW: false, format: 'Photo', status: JobStatus.FAILED, currentStep: PipelineStep.UPSCALE, progress: 40, timestamp: '14:21:12', cost: 0.02, error: 'Server Timeout', retryCount: 1 },
     { id: 'JOB-003', character: 'Model_A_V2', platform: 'Instagram', isNSFW: false, format: 'Photo', status: JobStatus.QUEUED, currentStep: PipelineStep.BASE_GEN, progress: 0, timestamp: '14:22:15', cost: 0.05, retryCount: 0 },
     { id: 'JOB-004', character: 'Vogue_01', platform: 'Client', isNSFW: false, format: 'Photo', status: JobStatus.COMPLETED, currentStep: PipelineStep.FINAL_RENDER, progress: 100, timestamp: '14:18:30', cost: 0.05, qualityStatus: 'Pending', retryCount: 0 },
     { id: 'JOB-005', character: 'Brand_Amb_01', platform: 'Instagram', isNSFW: false, format: 'Video', status: JobStatus.PAUSED, currentStep: PipelineStep.CLOTH_SWAP, progress: 20, timestamp: '14:15:00', cost: 0.02, retryCount: 0 },
     { id: 'JOB-006', character: 'Model_A_V2', platform: 'Instagram', isNSFW: false, format: 'Photo', status: JobStatus.COMPLETED, currentStep: PipelineStep.FINAL_RENDER, progress: 100, timestamp: '14:10:00', cost: 0.05, qualityStatus: 'Pending', retryCount: 0 },
     { id: 'JOB-007', character: 'Vogue_01', platform: 'Client', isNSFW: false, format: 'Photo', status: JobStatus.COMPLETED, currentStep: PipelineStep.FINAL_RENDER, progress: 100, timestamp: '14:05:00', cost: 0.05, qualityStatus: 'Pending', retryCount: 0 },
-    { id: 'JOB-008', character: 'Brand_Amb_01', platform: 'Twitter', isNSFW: true, format: 'Video', status: JobStatus.PROCESSING, currentStep: PipelineStep.BASE_GEN, progress: 15, timestamp: '14:25:00', cost: 0.15, retryCount: 0 },
+    { id: 'JOB-008', character: 'Brand_Amb_01', platform: 'Twitter', isNSFW: false, format: 'Video', status: JobStatus.PROCESSING, currentStep: PipelineStep.BASE_GEN, progress: 15, timestamp: '14:25:00', cost: 0.15, retryCount: 0 },
 ];
 
 export function QueueManager() {

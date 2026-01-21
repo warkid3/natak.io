@@ -13,10 +13,12 @@ import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import { useAssets } from '@/hooks/use-assets';
 import { useJobs } from '@/hooks/use-jobs';
 import { createClient } from '@/lib/supabase/client';
+import { useUser } from '@/hooks/use-user';
 
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 export default function AssetsPage() {
+    const { user } = useUser();
     // ... existing state ...
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -79,7 +81,7 @@ export default function AssetsPage() {
     const [useVideo, setUseVideo] = useState(false); // Mode: false = Studio (ETL), true = Motion Control
     const [generateVideoLTX, setGenerateVideoLTX] = useState(false); // Config for Studio Mode
     const [videoAction, setVideoAction] = useState('animate');
-    const [isNsfw, setIsNsfw] = useState(false);
+    // const [isNsfw, setIsNsfw] = useState(false); // REMOVED: Inferred from Model
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
 
@@ -101,13 +103,15 @@ export default function AssetsPage() {
     }, [jobs, refreshAssets]);
 
     useEffect(() => {
+        if (!user?.id) return;
+
         // Load Collections from Supabase (distinct collection values from assets)
         const fetchCollections = async () => {
             const supabase = createClient();
             const { data } = await supabase
                 .from('assets')
                 .select('collection')
-                .eq('user_id', TEST_USER_ID)
+                .eq('user_id', user.id)
                 .not('collection', 'is', null);
 
             if (data) {
@@ -118,6 +122,7 @@ export default function AssetsPage() {
                     count: data.filter(a => a.collection === name).length,
                     created_at: new Date().toISOString()
                 }));
+                // Also fetch from 'collections' table if needed, but for now using asset groups
                 setCollections(cols);
             }
         };
@@ -129,12 +134,12 @@ export default function AssetsPage() {
             const { data, error } = await supabase
                 .from('characters')
                 .select('*')
-                .or(`is_shared.eq.true,user_id.eq.${TEST_USER_ID}`);
+                .or(`is_shared.eq.true,user_id.eq.${user.id}`);
 
             if (data && !error) {
                 setCharacters(data as CharacterModel[]);
                 // Auto-select first one
-                if (data.length > 0) setSelectedCharacterId(data[0].id);
+                if (data.length > 0 && !selectedCharacterId) setSelectedCharacterId(data[0].id);
             } else {
                 console.error("Failed to fetch characters:", error);
                 setCharacters([]);
@@ -142,7 +147,7 @@ export default function AssetsPage() {
         };
 
         fetchCharacters();
-    }, []);
+    }, [user?.id]);
 
     const toggleSelect = (id: string) => {
         setSelectedAssetIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -256,7 +261,7 @@ export default function AssetsPage() {
                     clothing_ref: clothingKey,
 
                     useGrok: promptingModel === 'xAI Grok Beta',
-                    isNSFW: isNsfw,
+                    isNSFW: promptingModel === 'xAI Grok Beta', // IMPLICIT: Grok = Unfiltered
                     aspectRatio: aspectRatio,
 
                     // Video Logic
@@ -575,11 +580,10 @@ export default function AssetsPage() {
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">2. Prompt Generator</label>
                                 <Select
-                                    value={isNsfw ? 'xAI Grok Beta' : promptingModel}
+                                    value={promptingModel}
                                     onValueChange={(val) => setPromptingModel(val as PromptingModel)}
-                                    disabled={isNsfw}
                                 >
-                                    <SelectTrigger className={cn("w-full bg-black border border-white/10 rounded-sm px-4 py-3 text-xs text-white focus:ring-0 focus:ring-offset-0 font-mono h-auto", isNsfw && 'opacity-50 cursor-not-allowed')}>
+                                    <SelectTrigger className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 text-xs text-white focus:ring-0 focus:ring-offset-0 font-mono h-auto">
                                         <SelectValue placeholder="Select Model" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-black border border-white/10 text-white">
@@ -587,16 +591,6 @@ export default function AssetsPage() {
                                         <SelectItem value="xAI Grok Beta" className="focus:bg-white/10 focus:text-white cursor-pointer">xAI Grok Beta (Creative)</SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
-
-                            <div className="flex items-center justify-between bg-zinc-900 border border-white/5 p-3 rounded-sm">
-                                <div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">NSFW Mode</span>
-                                    {isNsfw && <span className="text-[8px] text-red-400 ml-2">(Grok locked)</span>}
-                                </div>
-                                <button onClick={() => setIsNsfw(!isNsfw)} className={cn("px-2 py-1 text-[8px] font-black rounded-sm border transition-colors", isNsfw ? 'bg-red-600/20 text-red-500 border-red-500' : 'text-slate-600 border-slate-800')}>
-                                    {isNsfw ? 'ON' : 'OFF'}
-                                </button>
                             </div>
 
                             <div className="space-y-3">

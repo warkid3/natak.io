@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { emailService } from "@/lib/email";
 
 export async function createOrganization(name: string) {
     const supabase = await createClient();
@@ -34,11 +34,6 @@ export async function createOrganization(name: string) {
     return { success: true };
 }
 
-async function triggerWelcomeEmail(email: string) {
-    console.log(`[SIMULATION] Sending welcome email to: ${email}`);
-    // In production, call a service like Resend or a Supabase Edge Function here.
-}
-
 export async function joinOrganization(orgId: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -65,7 +60,22 @@ export async function joinOrganization(orgId: string) {
 
     if (profileError) throw profileError;
 
-    await triggerWelcomeEmail(user.email!);
+    // Send welcome email
+    try {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', user.id)
+            .single();
+
+        await emailService.sendOnboardingComplete(
+            user.email!,
+            profile?.name || 'Operator',
+            'Starter' // Default tier for joiners
+        );
+    } catch (emailError) {
+        console.error("Failed to send welcome email (non-fatal):", emailError);
+    }
 
     revalidatePath("/");
     return { success: true };
@@ -97,17 +107,52 @@ export async function selectPlan(tier: string) {
 
     if (!user) throw new Error("Unauthorized");
 
+    // Determine credits based on tier
+    // Starter/Operator: 200
+    // Pro/Director: 800
+    // Agency/Executive: 10000 (Effectively unlimited for beta)
+    let initialCredits = 200;
+    if (tier === 'Pro' || tier === 'Director') initialCredits = 800;
+    if (tier === 'Agency' || tier === 'Executive') initialCredits = 10000;
+
     const { error } = await supabase
         .from('profiles')
         .update({
             tier: tier,
-            onboarding_status: 'completed'
+            onboarding_status: 'completed',
+            credits: initialCredits // Grant initial credits
         })
         .eq('id', user.id);
 
     if (error) throw error;
 
-    await triggerWelcomeEmail(user.email!);
+    // Log the credit grant
+    await supabase.from('credits_ledger').insert({
+        user_id: user.id,
+        amount: initialCredits,
+        action: 'PLAN_GRANT',
+        metadata: { tier: tier }
+    });
+
+
+
+    // Send onboarding complete email with tier info
+    // Wrap in try-catch to ensure onboarding completes even if email fails (e.g. unverified email in dev)
+    try {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', user.id)
+            .single();
+
+        await emailService.sendOnboardingComplete(
+            user.email!,
+            profile?.name || 'Operator',
+            tier
+        );
+    } catch (emailError) {
+        console.error("Failed to send onboarding email (non-fatal):", emailError);
+    }
 
     revalidatePath("/");
     return { success: true };

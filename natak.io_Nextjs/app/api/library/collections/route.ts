@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const userId = searchParams.get("userId");
 
-        if (!userId) {
-            return NextResponse.json({ error: "User ID required" }, { status: 400 });
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { data: collections, error } = await supabase
@@ -16,7 +18,7 @@ export async function GET(req: NextRequest) {
         *,
         collection_items(count)
       `)
-            .eq("user_id", userId)
+            .eq("user_id", user.id)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -33,18 +35,25 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { userId, name, description } = await req.json();
+        const { name, description } = await req.json();
 
-        if (!userId || !name) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        if (!name) {
             return NextResponse.json(
-                { error: "User ID and name required" },
+                { error: "Name required" },
                 { status: 400 }
             );
         }
 
         const { data: collection, error } = await supabase
             .from("collections")
-            .insert({ user_id: userId, name, description })
+            .insert({ user_id: user.id, name, description })
             .select()
             .single();
 

@@ -116,8 +116,8 @@ export default function GenerationConfig({ onGenerate }: GenerationConfigProps) 
                                 key={r}
                                 onClick={() => setAspectRatio(r)}
                                 className={`p-2 rounded-md text-sm border ${aspectRatio === r
-                                        ? "border-purple-500 bg-purple-500/20 text-white"
-                                        : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                                    ? "border-purple-500 bg-purple-500/20 text-white"
+                                    : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
                                     }`}
                             >
                                 {r}
@@ -152,10 +152,10 @@ export default function GenerationConfig({ onGenerate }: GenerationConfigProps) 
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium text-red-400">NSFW Mode</label>
+                        <label className="text-sm font-medium text-purple-400">Unfiltered Mode</label>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" checked={isNSFW} onChange={(e) => setIsNSFW(e.target.checked)} className="sr-only peer" />
-                            <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                            <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
                     </div>
                 </div>

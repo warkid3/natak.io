@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Heart, FolderPlus, Download, MoreVertical, Folder, Star } from 'lucide-react';
+import { Heart, FolderPlus, Download, MoreVertical, Folder, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
 
@@ -91,6 +91,26 @@ export default function LibraryPage() {
         }
     };
 
+    const handleDeleteCollection = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this collection?")) return;
+
+        try {
+            const res = await fetch(`/api/library/collections/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error("Failed to delete");
+
+            // If currently selected, clear selection
+            if (selectedCollection === id) {
+                setFilter('all');
+                setSelectedCollection(null);
+            }
+            fetchCollections();
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Delete failed");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0a0a0b] text-white p-8">
             <div className="flex gap-8">
@@ -139,17 +159,26 @@ export default function LibraryPage() {
                             </div>
                             <div className="space-y-1">
                                 {collections.map((collection) => (
-                                    <button
+                                    <div
                                         key={collection.id}
                                         onClick={() => { setFilter('collection'); setSelectedCollection(collection.id); }}
                                         className={cn(
-                                            "w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-all",
+                                            "w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-all group cursor-pointer",
                                             selectedCollection === collection.id ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                                         )}
                                     >
-                                        <span className="truncate">{collection.name}</span>
-                                        <span className="text-xs text-zinc-600 ml-2">{collection.collection_items?.[0]?.count || 0}</span>
-                                    </button>
+                                        <div className="flex items-center min-w-0 flex-1">
+                                            <span className="truncate">{collection.name}</span>
+                                            <span className="text-xs text-zinc-600 ml-2">{collection.collection_items?.[0]?.count || 0}</span>
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteCollection(e, collection.id)}
+                                            className="ml-2 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-zinc-800 text-zinc-600 hover:text-red-500 rounded transition-all"
+                                            title="Delete Collection"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -202,7 +231,7 @@ function OutputCard({ output, onToggleFavorite, onAddToCollection }: any) {
                     {/* Top bar */}
                     <div className="flex justify-between items-start">
                         <div className="flex gap-2">
-                            {output.is_nsfw && <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded">18+</span>}
+                            {output.is_nsfw && <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded">PRO</span>}
                             <span className="px-2 py-0.5 bg-zinc-900/80 text-white text-[9px] font-bold rounded">{output.platform}</span>
                         </div>
                         <button
