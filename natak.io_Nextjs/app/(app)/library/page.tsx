@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, FolderPlus, Download, MoreVertical, Folder, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/hooks/use-user';
 
 interface LibraryOutput {
     id: string;
@@ -25,6 +26,7 @@ interface Collection {
 }
 
 export default function LibraryPage() {
+    const { user, loading: userLoading } = useUser();
     const [outputs, setOutputs] = useState<LibraryOutput[]>([]);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [filter, setFilter] = useState<'all' | 'favorites' | 'collection'>('all');
@@ -33,15 +35,17 @@ export default function LibraryPage() {
     const [showCreateCollection, setShowCreateCollection] = useState(false);
 
     useEffect(() => {
-        fetchLibrary();
-        fetchCollections();
-    }, [filter, selectedCollection]);
+        if (user?.id) {
+            fetchLibrary();
+            fetchCollections();
+        }
+    }, [filter, selectedCollection, user?.id]);
 
     const fetchLibrary = async () => {
+        if (!user?.id) return;
         setLoading(true);
         try {
-            const userId = 'mock-user-id'; // TODO: Get from auth
-            let url = `/api/library?userId=${userId}&filter=${filter}`;
+            let url = `/api/library?userId=${user.id}&filter=${filter}`;
             if (filter === 'collection' && selectedCollection) {
                 url += `&collectionId=${selectedCollection}`;
             }
@@ -57,9 +61,9 @@ export default function LibraryPage() {
     };
 
     const fetchCollections = async () => {
+        if (!user?.id) return;
         try {
-            const userId = 'mock-user-id';
-            const res = await fetch(`/api/library/collections?userId=${userId}`);
+            const res = await fetch(`/api/library/collections?userId=${user.id}`);
             const data = await res.json();
             setCollections(data.collections || []);
         } catch (error) {
@@ -68,17 +72,17 @@ export default function LibraryPage() {
     };
 
     const toggleFavorite = async (jobId: string, currentlyFavorited: boolean) => {
+        if (!user?.id) return;
         try {
-            const userId = 'mock-user-id';
             if (currentlyFavorited) {
-                await fetch(`/api/library/favorites?userId=${userId}&jobId=${jobId}`, {
+                await fetch(`/api/library/favorites?userId=${user.id}&jobId=${jobId}`, {
                     method: 'DELETE',
                 });
             } else {
                 await fetch('/api/library/favorites', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, jobId }),
+                    body: JSON.stringify({ userId: user.id, jobId }),
                 });
             }
             fetchLibrary();
@@ -176,6 +180,7 @@ export default function LibraryPage() {
             {/* Create Collection Modal */}
             {showCreateCollection && (
                 <CreateCollectionModal
+                    userId={user?.id}
                     onClose={() => setShowCreateCollection(false)}
                     onCreated={fetchCollections}
                 />
@@ -254,13 +259,13 @@ function EmptyLibraryState({ filter }: { filter: string }) {
     );
 }
 
-function CreateCollectionModal({ onClose, onCreated }: any) {
+function CreateCollectionModal({ userId, onClose, onCreated }: { userId?: string; onClose: () => void; onCreated: () => void }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
     const handleCreate = async () => {
+        if (!userId) return;
         try {
-            const userId = 'mock-user-id';
             await fetch('/api/library/collections', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Asset, CharacterModel, ImageModel, VideoModel, PromptingModel, GenerationJob, Collection } from '@/types';
-import { mockStore } from '@/lib/mockStore';
+import { realStore } from '@/services/realStore';
 import { X, Check, Settings, Upload, Folder, Plus, Search, Filter, Grid, List as ListIcon, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -101,12 +101,30 @@ export default function AssetsPage() {
     }, [jobs, refreshAssets]);
 
     useEffect(() => {
-        // Load Collections from Mock (keep for now until REAL storage is ready)
-        setCollections(mockStore.getCollections());
+        // Load Collections from Supabase (distinct collection values from assets)
+        const fetchCollections = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('assets')
+                .select('collection')
+                .eq('user_id', TEST_USER_ID)
+                .not('collection', 'is', null);
+
+            if (data) {
+                const uniqueCollections = [...new Set(data.map(a => a.collection).filter(Boolean))];
+                const cols: Collection[] = uniqueCollections.map((name, i) => ({
+                    id: `col-${i}`,
+                    name: name as string,
+                    count: data.filter(a => a.collection === name).length,
+                    created_at: new Date().toISOString()
+                }));
+                setCollections(cols);
+            }
+        };
+        fetchCollections();
 
         // Load REAL Characters from Supabase
         const fetchCharacters = async () => {
-            const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             const { data, error } = await supabase
                 .from('characters')
@@ -119,8 +137,7 @@ export default function AssetsPage() {
                 if (data.length > 0) setSelectedCharacterId(data[0].id);
             } else {
                 console.error("Failed to fetch characters:", error);
-                // Fallback
-                setCharacters(mockStore.getCharacters().filter(c => c.status === 'ready'));
+                setCharacters([]);
             }
         };
 
@@ -137,9 +154,10 @@ export default function AssetsPage() {
 
     const handleSaveCollection = () => {
         if (newCollectionName.trim()) {
-            const newCol = { id: `c-${Date.now()}`, name: newCollectionName.trim(), count: 0, created_at: new Date().toISOString() };
-            mockStore.saveCollection(newCol);
-            setCollections(mockStore.getCollections());
+            const newCol: Collection = { id: `c-${Date.now()}`, name: newCollectionName.trim(), count: 0, created_at: new Date().toISOString() };
+            // Collections are just names on assets - add to local state for now
+            // When assets are assigned to this collection, it will persist
+            setCollections(prev => [...prev, newCol]);
             setNewCollectionName('');
             setShowCollectionModal(false);
         }

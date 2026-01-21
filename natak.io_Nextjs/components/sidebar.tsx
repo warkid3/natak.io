@@ -23,24 +23,16 @@ import {
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { mockStore } from '@/lib/mockStore';
+import { useUser } from '@/hooks/use-user';
 import { cn } from '@/lib/utils';
 
 export function Sidebar() {
     const router = useRouter();
     const pathname = usePathname();
-    const [user, setUser] = React.useState<any>(null);
+    const { user, loading, signOut } = useUser();
 
-    React.useEffect(() => {
-        setUser(mockStore.getUser());
-        const interval = setInterval(() => {
-            setUser(mockStore.getUser());
-        }, 2000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const handleLogout = () => {
-        mockStore.setUser(null);
+    const handleLogout = async () => {
+        await signOut();
         router.push('/login');
     };
 

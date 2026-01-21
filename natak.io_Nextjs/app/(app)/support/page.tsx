@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { mockStore } from '@/lib/mockStore';
+import { realStore } from '@/services/realStore';
 import { Ticket } from '@/types';
 import { HelpCircle, Terminal, MessageSquare, Send, ShieldAlert, CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -60,10 +60,14 @@ export default function SupportPage() {
     const [description, setDescription] = useState('');
 
     useEffect(() => {
-        setTickets(mockStore.getTickets());
+        const loadTickets = async () => {
+            const data = await realStore.getTickets();
+            setTickets(data);
+        };
+        loadTickets();
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const newTicket: Ticket = {
             id: `TK-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
@@ -72,7 +76,7 @@ export default function SupportPage() {
             status: 'open',
             timestamp: new Date().toISOString()
         };
-        mockStore.saveTicket(newTicket);
+        await realStore.saveTicket(newTicket);
         setTickets([newTicket, ...tickets]);
         setShowForm(false);
         setSubject('');

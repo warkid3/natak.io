@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { mockStore } from '@/lib/mockStore';
 import { User, ImageModel, VideoModel } from '@/types';
 import { User as UserIcon, Settings2, Key, Terminal, Eye, EyeOff, Save, RefreshCw, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -61,14 +60,21 @@ export default function SettingsPage() {
             const { data: { user } } = await supabase.auth.getUser();
 
             if (user) {
-                // Fetch profile/settings (mocking for now, but using real user ID)
+                // Fetch profile data from profiles table
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
                 setUser({
                     id: user.id,
-                    name: user.user_metadata?.full_name || 'Operator',
+                    name: profile?.name || user.user_metadata?.full_name || 'Operator',
                     email: user.email || '',
-                    tier: 'Agency', // Force Agency tier for now to enable API tab
-                    // ... other fields
-                } as any);
+                    tier: profile?.tier || 'Starter',
+                    credits: profile?.credits || 0,
+                    avatar_url: profile?.avatar_url
+                } as User);
 
                 // Check for existing API key in metadata
                 const apiKey = user.user_metadata?.api_key;
@@ -78,15 +84,14 @@ export default function SettingsPage() {
                     // Generate new if none
                     const newKey = `nk_${user.id.substring(0, 8)}_${Math.random().toString(36).substring(2, 15)}`;
                     setApiKey(newKey);
-                    // In a real app, we'd save this back to user metadata here
                 }
             } else {
-                // Fallback to mockStore only if no auth
-                setUser(mockStore.getUser());
+                // No authenticated user - redirect to login would be appropriate
+                setUser(null);
             }
         } catch (error) {
             console.error('Failed to fetch settings:', error);
-            setUser(mockStore.getUser());
+            setUser(null);
         } finally {
             setLoading(false);
         }

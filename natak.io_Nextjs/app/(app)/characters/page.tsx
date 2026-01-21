@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CharacterModel } from '@/types';
-import { mockStore } from '@/lib/mockStore';
+import { realStore } from '@/services/realStore';
 import { BlurFade } from '@/components/ui/blur-fade';
 import CharacterUpload from '@/components/CharacterUpload';
 import { Sparkles, X } from 'lucide-react';
@@ -67,8 +67,15 @@ export default function CharactersPage() {
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
     useEffect(() => {
-        setUser(mockStore.getUser());
-        setCharacters(mockStore.getCharacters());
+        const loadData = async () => {
+            const [userData, charData] = await Promise.all([
+                realStore.getUser(),
+                realStore.getCharacters()
+            ]);
+            setUser(userData);
+            setCharacters(charData);
+        };
+        loadData();
     }, []);
 
     const heroImages = [
@@ -191,10 +198,11 @@ export default function CharactersPage() {
 
                         <CharacterUpload
                             onUploadStart={() => console.log("Upload started")}
-                            onUploadComplete={() => {
+                            onUploadComplete={async () => {
                                 setIsCreating(false);
-                                // Refresh logic could go here or rely on real-time / manual refresh
-                                setCharacters(mockStore.getCharacters());
+                                // Refresh characters from DB
+                                const charData = await realStore.getCharacters();
+                                setCharacters(charData);
                             }}
                             onFileChange={handleFileChange}
                         />

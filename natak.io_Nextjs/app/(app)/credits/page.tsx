@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { mockStore } from '@/lib/mockStore';
+import { realStore } from '@/services/realStore';
 import { Transaction, User } from '@/types';
 import { Zap, ShieldCheck, Check, Clock, TrendingDown, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,8 +43,15 @@ export default function CreditStorePage() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
 
     useEffect(() => {
-        setUser(mockStore.getUser());
-        setTransactions(mockStore.getTransactions());
+        const loadData = async () => {
+            const [userData, txData] = await Promise.all([
+                realStore.getUser(),
+                realStore.getTransactions()
+            ]);
+            setUser(userData);
+            setTransactions(txData);
+        };
+        loadData();
     }, []);
 
     return (
