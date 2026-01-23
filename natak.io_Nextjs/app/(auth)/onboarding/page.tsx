@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Building2, Users, Rocket, CheckCircle2, ChevronRight, Globe, LayoutGrid, Zap } from 'lucide-react';
 import { createOrganization, joinOrganization, submitMarketingData, selectPlan } from './actions';
 import PricingSection from '@/components/ui/pricing-section-4';
+import { CreditStoreSection } from '@/components/CreditStoreSection';
 import { cn } from '@/lib/utils';
 
 type OnboardingStep = 'org_selection' | 'org_details' | 'marketing' | 'pricing' | 'completed';
@@ -47,7 +48,7 @@ export default function OnboardingPage() {
             if (profile?.onboarding_status && profile.onboarding_status !== 'completed') {
                 setStep(profile.onboarding_status as OnboardingStep);
             } else if (profile?.onboarding_status === 'completed') {
-                router.push('/assets');
+                router.push('/analytics');
             }
             setLoading(false);
         };
@@ -73,7 +74,7 @@ export default function OnboardingPage() {
             await handleAction(() => createOrganization(orgName), 'marketing');
         } else {
             await handleAction(() => joinOrganization(orgId));
-            router.push('/assets');
+            router.push('/analytics');
         }
     };
 
@@ -83,8 +84,13 @@ export default function OnboardingPage() {
     };
 
     const handlePlanSelect = async (plan: string) => {
-        await handleAction(() => selectPlan(plan));
-        router.push('/assets');
+        // Map UI plan names to Database values
+        let dbTier = plan;
+        if (plan === 'Business') dbTier = 'Pro';
+        if (plan === 'Enterprise') dbTier = 'Agency';
+
+        await handleAction(() => selectPlan(dbTier));
+        router.push('/analytics');
     };
 
     if (loading && step === 'org_selection') {
@@ -194,6 +200,16 @@ export default function OnboardingPage() {
                     </Card>
                 )}
 
+                {/* Global Loading Overlay */}
+                {loading && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-8 h-8 border-t-2 border-primary animate-spin rounded-full" />
+                            <p className="text-white font-mono text-xs animate-pulse">PROCESSING...</p>
+                        </div>
+                    </div>
+                )}
+
                 {step === 'marketing' && (
                     <Card className="bg-black/40 backdrop-blur-xl border-white/10 max-w-xl mx-auto animate-element">
                         <CardHeader>
@@ -238,6 +254,12 @@ export default function OnboardingPage() {
                                     </div>
                                 </div>
 
+                                {error && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-xs font-mono">
+                                        {error}
+                                    </div>
+                                )}
+
                                 <Button
                                     className="w-full h-12 bg-primary text-black font-black uppercase tracking-[0.2em]"
                                     disabled={!marketingData.role || !marketingData.teamSize}
@@ -250,12 +272,24 @@ export default function OnboardingPage() {
                 )}
 
                 {step === 'pricing' && (
-                    <div className="animate-element">
+                    <div className="animate-element relative">
                         <div className="text-center mb-12">
                             <h2 className="text-4xl font-black uppercase text-white mb-2 italic">Select a Plan</h2>
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Choose the plan that fits your needs</p>
                         </div>
+
+                        {error && (
+                            <div className="max-w-md mx-auto mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-center font-mono">
+                                Error: {error}
+                            </div>
+                        )}
+
                         <PricingSection onSelectPlan={handlePlanSelect} />
+
+                        <div className="mt-20 border-t border-white/5 pt-10">
+                            <CreditStoreSection />
+                        </div>
+
                         <div className="flex justify-center mt-12">
                             <Button
                                 variant="ghost"

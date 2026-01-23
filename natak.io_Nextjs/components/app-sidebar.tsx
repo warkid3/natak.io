@@ -44,14 +44,14 @@ import { useCredits } from "@/hooks/use-credits";
 const navData = {
     workspace: [
         {
-            title: "Operations Center",
-            url: "/operations",
-            icon: Home,
-        },
-        {
             title: "Analytics",
             url: "/analytics",
             icon: BarChart3,
+        },
+        {
+            title: "Operations (Queue)",
+            url: "/operations",
+            icon: Home,
         },
         {
             title: "Library",

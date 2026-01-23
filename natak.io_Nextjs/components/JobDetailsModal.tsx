@@ -45,7 +45,7 @@ export default function JobDetailsModal({ job, onClose, onAction }: JobDetailsMo
                         <InfoCard label="Current Step" value={`${job.current_step}/5`} />
                         <InfoCard label="Cost" value={`$${job.cost.toFixed(2)}`} />
                         <InfoCard label="Retry Count" value={job.retry_count.toString()} />
-                        <InfoCard label="NSFW" value={job.is_nsfw ? 'Yes' : 'No'} />
+                        <InfoCard label="Safety Profile" value={job.is_nsfw ? 'Unfiltered' : 'Standard'} />
                     </div>
 
                     {/* Prompt */}

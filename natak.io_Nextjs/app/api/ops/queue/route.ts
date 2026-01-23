@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
+
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         // Filter parameters
         const filter = searchParams.get("filter") || "all"; // all, processing, failed, qc_required, stuck
@@ -19,6 +26,7 @@ export async function GET(req: NextRequest) {
                     trigger_word
                 )
             `)
+            .eq("user_id", user.id) // Enforce ownership
             .order("created_at", { ascending: false });
 
         // Apply filters

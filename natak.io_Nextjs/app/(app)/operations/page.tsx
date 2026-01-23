@@ -235,7 +235,7 @@ function TableView({ jobs, onInspect, getActionRequired }: any) {
                                         <div>
                                             <div className="font-bold flex items-center gap-2">
                                                 {job.character_name || 'Unknown'}
-                                                {job.is_nsfw && <span className="text-[9px] px-1 bg-rose-500/20 text-rose-500 rounded font-black">18+</span>}
+                                                {job.is_nsfw && <span className="text-[9px] px-1 bg-rose-500/20 text-rose-500 rounded font-black">PRO</span>}
                                             </div>
                                             <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">
                                                 {job.id.slice(0, 8)} • {job.format} • {job.platform}

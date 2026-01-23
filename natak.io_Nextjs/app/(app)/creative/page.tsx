@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BlurFade } from "@/components/ui/blur-fade";
 import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 import { cn } from "@/lib/utils";
-import { mockStore } from "@/lib/mockStore";
+import { realStore } from "@/services/realStore";
 import { CharacterModel } from "@/types";
 
 const DEMO_CARDS = [
@@ -60,8 +60,11 @@ const PromptInputBox = React.forwardRef<HTMLDivElement, any>(({ onSend, isLoadin
     const [characters, setCharacters] = React.useState<CharacterModel[]>([]);
 
     React.useEffect(() => {
-        // Only access mockStore on client side handled by lib/mockStore checks but standard useEffect helps too
-        setCharacters(mockStore.getCharacters().filter(c => c.status === 'ready'));
+        const loadCharacters = async () => {
+            const chars = await realStore.getCharacters();
+            setCharacters(chars.filter(c => c.status === 'ready'));
+        };
+        loadCharacters();
     }, []);
 
     const handleSubmit = () => {

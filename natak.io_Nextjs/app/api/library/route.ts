@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const userId = searchParams.get("userId");
+
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const userId = user.id;
         const filter = searchParams.get("filter") || "all"; // all, favorites, collection
         const collectionId = searchParams.get("collectionId");
-
-        if (!userId) {
-            return NextResponse.json({ error: "User ID required" }, { status: 400 });
-        }
 
         let query = supabase
             .from("jobs")

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Heart, FolderPlus, Download, MoreVertical, Folder, Star } from 'lucide-react';
+import { Heart, FolderPlus, Download, MoreVertical, Folder, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/hooks/use-user';
 
 interface LibraryOutput {
     id: string;
@@ -25,6 +26,7 @@ interface Collection {
 }
 
 export default function LibraryPage() {
+    const { user, loading: userLoading } = useUser();
     const [outputs, setOutputs] = useState<LibraryOutput[]>([]);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [filter, setFilter] = useState<'all' | 'favorites' | 'collection'>('all');
@@ -33,15 +35,17 @@ export default function LibraryPage() {
     const [showCreateCollection, setShowCreateCollection] = useState(false);
 
     useEffect(() => {
-        fetchLibrary();
-        fetchCollections();
-    }, [filter, selectedCollection]);
+        if (user?.id) {
+            fetchLibrary();
+            fetchCollections();
+        }
+    }, [filter, selectedCollection, user?.id]);
 
     const fetchLibrary = async () => {
+        if (!user?.id) return;
         setLoading(true);
         try {
-            const userId = 'mock-user-id'; // TODO: Get from auth
-            let url = `/api/library?userId=${userId}&filter=${filter}`;
+            let url = `/api/library?userId=${user.id}&filter=${filter}`;
             if (filter === 'collection' && selectedCollection) {
                 url += `&collectionId=${selectedCollection}`;
             }
@@ -57,9 +61,9 @@ export default function LibraryPage() {
     };
 
     const fetchCollections = async () => {
+        if (!user?.id) return;
         try {
-            const userId = 'mock-user-id';
-            const res = await fetch(`/api/library/collections?userId=${userId}`);
+            const res = await fetch(`/api/library/collections?userId=${user.id}`);
             const data = await res.json();
             setCollections(data.collections || []);
         } catch (error) {
@@ -68,22 +72,42 @@ export default function LibraryPage() {
     };
 
     const toggleFavorite = async (jobId: string, currentlyFavorited: boolean) => {
+        if (!user?.id) return;
         try {
-            const userId = 'mock-user-id';
             if (currentlyFavorited) {
-                await fetch(`/api/library/favorites?userId=${userId}&jobId=${jobId}`, {
+                await fetch(`/api/library/favorites?userId=${user.id}&jobId=${jobId}`, {
                     method: 'DELETE',
                 });
             } else {
                 await fetch('/api/library/favorites', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, jobId }),
+                    body: JSON.stringify({ userId: user.id, jobId }),
                 });
             }
             fetchLibrary();
         } catch (error) {
             console.error('Toggle favorite failed:', error);
+        }
+    };
+
+    const handleDeleteCollection = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this collection?")) return;
+
+        try {
+            const res = await fetch(`/api/library/collections/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error("Failed to delete");
+
+            // If currently selected, clear selection
+            if (selectedCollection === id) {
+                setFilter('all');
+                setSelectedCollection(null);
+            }
+            fetchCollections();
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Delete failed");
         }
     };
 
@@ -135,17 +159,26 @@ export default function LibraryPage() {
                             </div>
                             <div className="space-y-1">
                                 {collections.map((collection) => (
-                                    <button
+                                    <div
                                         key={collection.id}
                                         onClick={() => { setFilter('collection'); setSelectedCollection(collection.id); }}
                                         className={cn(
-                                            "w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-all",
+                                            "w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-all group cursor-pointer",
                                             selectedCollection === collection.id ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                                         )}
                                     >
-                                        <span className="truncate">{collection.name}</span>
-                                        <span className="text-xs text-zinc-600 ml-2">{collection.collection_items?.[0]?.count || 0}</span>
-                                    </button>
+                                        <div className="flex items-center min-w-0 flex-1">
+                                            <span className="truncate">{collection.name}</span>
+                                            <span className="text-xs text-zinc-600 ml-2">{collection.collection_items?.[0]?.count || 0}</span>
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteCollection(e, collection.id)}
+                                            className="ml-2 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-zinc-800 text-zinc-600 hover:text-red-500 rounded transition-all"
+                                            title="Delete Collection"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -176,6 +209,7 @@ export default function LibraryPage() {
             {/* Create Collection Modal */}
             {showCreateCollection && (
                 <CreateCollectionModal
+                    userId={user?.id}
                     onClose={() => setShowCreateCollection(false)}
                     onCreated={fetchCollections}
                 />
@@ -197,7 +231,7 @@ function OutputCard({ output, onToggleFavorite, onAddToCollection }: any) {
                     {/* Top bar */}
                     <div className="flex justify-between items-start">
                         <div className="flex gap-2">
-                            {output.is_nsfw && <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded">18+</span>}
+                            {output.is_nsfw && <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded">PRO</span>}
                             <span className="px-2 py-0.5 bg-zinc-900/80 text-white text-[9px] font-bold rounded">{output.platform}</span>
                         </div>
                         <button
@@ -254,13 +288,13 @@ function EmptyLibraryState({ filter }: { filter: string }) {
     );
 }
 
-function CreateCollectionModal({ onClose, onCreated }: any) {
+function CreateCollectionModal({ userId, onClose, onCreated }: { userId?: string; onClose: () => void; onCreated: () => void }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
     const handleCreate = async () => {
+        if (!userId) return;
         try {
-            const userId = 'mock-user-id';
             await fetch('/api/library/collections', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

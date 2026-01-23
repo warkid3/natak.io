@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { mockStore } from '@/lib/mockStore';
+import { realStore } from '@/services/realStore';
 import { Notification } from '@/types';
 import { Bell, Zap, Terminal, ShieldAlert, Check, Trash2, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,16 +12,20 @@ export default function NotificationsPage() {
     const router = useRouter();
 
     useEffect(() => {
-        setNotifications(mockStore.getNotifications());
+        const loadNotifications = async () => {
+            const data = await realStore.getNotifications();
+            setNotifications(data);
+        };
+        loadNotifications();
     }, []);
 
-    const handleMarkAllRead = () => {
-        notifications.forEach(n => mockStore.markNotificationRead(n.id));
+    const handleMarkAllRead = async () => {
+        await Promise.all(notifications.map(n => realStore.markNotificationRead(n.id)));
         setNotifications(notifications.map(n => ({ ...n, read: true })));
     };
 
-    const handleItemClick = (n: Notification) => {
-        mockStore.markNotificationRead(n.id);
+    const handleItemClick = async (n: Notification) => {
+        await realStore.markNotificationRead(n.id);
         if (n.link) router.push(n.link);
         setNotifications(notifications.map(notif => notif.id === n.id ? { ...notif, read: true } : notif));
     };
